@@ -1,0 +1,12 @@
+directories:
+  output: release
+  buildResources: build
+appId: com.nexaledger.app
+productName: NexaLedger
+files:
+  - filter:
+      - dist/**/*
+      - electron/**/*
+win:
+  target: nsis
+electronVersion: 32.3.3
