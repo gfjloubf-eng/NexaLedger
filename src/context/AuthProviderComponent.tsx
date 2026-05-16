@@ -1,4 +1,4 @@
- import React, {
+import React, {
   useCallback,
   useEffect,
   useMemo,
@@ -68,9 +68,13 @@ export function AuthProvider({
       });
 
       console.log('signInWithPassword response:', data, error);
+
       if (error) throw error;
+
       if (!data.session) {
-        throw new Error('فشل تسجيل الدخول. تأكد من صحة بياناتك أو حالة الحساب.');
+        throw new Error(
+          'فشل تسجيل الدخول. تأكد من صحة بياناتك أو حالة الحساب.'
+        );
       }
     },
     []
@@ -78,17 +82,16 @@ export function AuthProvider({
 
   const signUp = useCallback(
     async (email: string, password: string) => {
-      const { data, error } = await supabase.auth.signUp(
-        {
-          email,
-          password,
-        },
-        {
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
           emailRedirectTo: window.location.origin,
-        }
-      );
+        },
+      });
 
       console.log('signUp response:', data, error);
+
       if (error) throw error;
 
       return {
