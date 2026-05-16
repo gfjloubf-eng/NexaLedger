@@ -47,13 +47,13 @@ export function AuthProvider({
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange(
-      (event, newSession) => {
-        console.log('Auth state changed:', event, newSession?.session?.user?.id ?? newSession?.user?.id ?? null);
-        setSession(newSession);
-        setUser(newSession?.user ?? null);
-      }
-    );
+    } = supabase.auth.onAuthStateChange((arg: { event?: string; session?: Session | null; user?: User | null } | Session | null) => {
+      const event = (arg as any)?.event ?? null;
+      const sessionPayload = (arg as any)?.session ?? (arg as Session | null);
+      console.log('Auth state changed:', event, sessionPayload?.user?.id ?? null);
+      setSession((arg as any)?.session ?? (arg as Session | null) ?? null);
+      setUser((arg as any)?.session?.user ?? (arg as any)?.user ?? null);
+    });
 
     return () => {
       mounted = false;

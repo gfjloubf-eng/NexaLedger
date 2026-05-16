@@ -13,7 +13,7 @@ import type { ParsedTransaction, TransactionType } from '../types/transaction';
 import type { TransactionContextValue } from './transactionContext.types';
 
 import { buildTransactionContextValue, formatSupabaseTransactionRow, type TransactionRow } from './transactionHelpers';
-import { supabase } from '../lib/supabase';
+import { supabase, SUPABASE_URL } from '../lib/supabase';
 import { AuthContext } from './authContext';
 
 export const TransactionContext =
@@ -149,7 +149,7 @@ export function TransactionProvider({
       };
 
       console.log('Final insert payload:', payload);
-      console.log('Supabase client URL:', supabase.supabaseUrl);
+      console.log('Supabase client URL:', SUPABASE_URL);
 
       console.log('About to send insert request to Supabase');
       const { data, error } = await supabase
