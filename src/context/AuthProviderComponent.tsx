@@ -5,7 +5,7 @@
   useState,
 } from 'react';
 
-import type { Session, User, AuthChangeEvent } from '@supabase/supabase-js';
+import type { Session, User } from '@supabase/supabase-js';
 
 import { useNavigate } from 'react-router-dom';
 
@@ -47,11 +47,12 @@ export function AuthProvider({
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((event: AuthChangeEvent, session: Session | null) => {
-      console.log('Auth state changed:', event, session?.user?.id ?? null);
-      setSession(session);
-      setUser(session?.user ?? null);
-    });
+    } = supabase.auth.onAuthStateChange(
+      (_event, session) => {
+        setSession(session);
+        setUser(session?.user ?? null);
+      }
+    );
 
     return () => {
       mounted = false;
