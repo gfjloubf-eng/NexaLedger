@@ -1,123 +1,24 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+ /* Minimized - Tailwind handles layout/effects. Keep ticks for visual. */
 
-/* Branding variables and base typography */
-:root {
-  --bg-1: #0F172A;
-  --bg-2: #111827;
-  --card-bg: rgba(15,23,42,0.72);
-  --accent-primary: #10B981;
-  --accent-secondary: #2563EB;
-  --text-primary: #F8FAFC;
-  --text-secondary: #94A3B8;
+.ticks {
+  position: relative;
+  width: 100%;
 }
 
-html, body, #root {
-  height: 100%;
+.ticks::before,
+.ticks::after {
+  content: '';
+  position: absolute;
+  top: -4.5px;
+  border: 5px solid transparent;
 }
 
-body {
-  font-family: Inter, "Noto Naskh Arabic", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
-  background-color: var(--bg-1);
-  color: var(--text-primary);
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  direction: rtl;
+.ticks::before {
+  left: 0;
+  border-left-color: theme('colors.gray.200');
 }
 
-.glass-card {
-  background: var(--card-bg);
-  border: 1px solid rgba(255,255,255,0.06);
-  backdrop-filter: blur(6px);
-  color: var(--text-primary);
+.ticks::after {
+  right: 0;
+  border-right-color: theme('colors.gray.200');
 }
-
-.small-muted { color: var(--text-secondary); }
-
-/* Design system primitives - Phase 1 */
-/* Buttons */
-.btn { @apply inline-flex items-center justify-center rounded-2xl font-semibold transition; padding: 0.75rem 1rem; }
-.btn-primary { background: var(--accent-primary); color: var(--bg-1); box-shadow: 0 8px 30px rgba(16,185,129,0.12); }
-.btn-secondary { background: var(--accent-secondary); color: #fff; box-shadow: 0 6px 24px rgba(37,99,235,0.08); }
-.btn-ghost { background: transparent; border: 1px solid rgba(255,255,255,0.06); color: var(--text-primary); }
-
-/* Inputs */
-.input { @apply w-full p-4 rounded-2xl; border: 1px solid rgba(255,255,255,0.06); background: var(--card-bg); color: var(--text-primary); outline: none; }
-.input::placeholder { color: var(--text-secondary); }
-.input:focus { box-shadow: 0 0 0 6px rgba(16,185,129,0.06); border-color: var(--accent-primary); }
-
-/* Card */
-.card { background: var(--card-bg); border: 1px solid rgba(255,255,255,0.06); backdrop-filter: blur(8px); color: var(--text-primary); }
-
-/* Section containers */
-.section { @apply rounded-2xl p-4; background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); border: 1px solid rgba(255,255,255,0.04); }
-
-/* Utility */
-.focus-ring { box-shadow: 0 0 0 6px rgba(16,185,129,0.06); }
-
-/* Small responsive tweaks */
-@media (max-width: 640px) {
-  .btn { padding: 0.65rem 0.9rem; }
-  .card { padding: 0.75rem; }
-}
-
-
-@keyframes finFloatSlow {
-  0%, 100% { transform: translate3d(0,0,0) scale(1); }
-  50% { transform: translate3d(0,-14px,0) scale(1.02); }
-}
-
-/* Shimmer used by skeletons */
-@keyframes shimmer {
-  0% { transform: translateX(-100%); }
-  100% { transform: translateX(100%); }
-}
-
-/* Toast in animation (subtle) */
-@keyframes finToastIn {
-  0% { transform: translateY(-6px); opacity: 0; }
-  100% { transform: translateY(0); opacity: 1; }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .animate-\[finFloatSlow_10s_ease-in-out_infinite\],
-  .animate-\[finFloatSlow_12s_ease-in-out_infinite\],
-  .animate-\[finFloatSlow_14s_ease-in-out_infinite\],
-  .animate-\[shimmer_1.2s_ease-in-out_infinite\],
-  .animate-\[finToastIn_200ms_ease-out\] {
-    animation: none !important;
-  }
-}
-
-/* Print-friendly styles: monochrome, readable spacing, RTL-safe */
-@page { size: auto; margin: 12mm; }
-@media print {
-  :root { color-scheme: light; }
-  html, body { background: #fff !important; color: #000 !important; }
-
-  body { -webkit-print-color-adjust: exact; }
-
-  /* Remove translucent/backdrop effects that don't print well */
-  .glass-card, .card, .section, .btn, .input, .card * {
-    background: #fff !important;
-    color: #000 !important;
-    box-shadow: none !important;
-    border-color: #111 !important;
-  }
-
-  /* Ensure amounts use tabular numbers for alignment */
-  .tabular-nums { font-variant-numeric: tabular-nums; }
-
-  /* Hide UI chrome not relevant for printed document */
-  .no-print, .btn, button, input, select, textarea, .FinOverlay, .FinToastContainer, .FinSearchOverlay { display: none !important; }
-
-  /* Make content readable on print: larger type, more spacing */
-  body { font-size: 12pt; line-height: 1.35; }
-  .section, .card { padding: 12pt !important; border: 1pt solid #111 !important; }
-
-  /* Preserve RTL direction for Arabic print */
-  body, html { direction: rtl !important; }
-}
-
-

@@ -1,6 +1,6 @@
 # Cloude Code ToolBox — MCP & Skills awareness
 
-_Generated: 2026-05-16T20:51:51.212Z_
+_Generated: 2026-05-17T09:47:58.086Z_
 
 ## How to use this report
 
@@ -13,9 +13,9 @@ _Generated: 2026-05-16T20:51:51.212Z_
 
 ## MCP — workspace
 
-Workspace `mcp.json` _(folder: NexaLedger - Copy)_
+Workspace `mcp.json` _(folder: NexaLedger-Final)_
 
-- **c:\Users\pc\Desktop\NexaLedger - Copy\.mcp.json** — _File missing_
+- **c:\Users\pc\Desktop\NexaLedger-Final\.mcp.json** — _File missing_
 
 _No active workspace servers in mcp.json._
 
