@@ -1,3 +1,6 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
  /* Minimized - Tailwind handles layout/effects. Keep ticks for visual. */
 
 .ticks {
