@@ -67,8 +67,6 @@ export function AuthProvider({
         password,
       });
 
-      console.log('signInWithPassword response:', data, error);
-
       if (error) throw error;
 
       if (!data.session) {
@@ -89,8 +87,6 @@ export function AuthProvider({
           emailRedirectTo: window.location.origin,
         },
       });
-
-      console.log('signUp response:', data, error);
 
       if (error) throw error;
 
