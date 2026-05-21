@@ -33,8 +33,32 @@ const Sidebar: React.FC = () => {
       <div className="p-6 flex flex-col h-full">
         <div className="flex items-center gap-3 mb-10 p-3 rounded-xl bg-white/3 ring-1 ring-white/6">
 
-          <div className="w-11 h-11 bg-gradient-to-br from-blue-500 to-emerald-400 rounded-xl flex items-center justify-center shadow-sm">
-            <span className="text-white font-bold text-lg">N</span>
+          <div className="w-11 h-11 rounded-xl flex items-center justify-center ring-1 ring-white/10 bg-white/[0.02]">
+            <svg
+              width="42"
+              height="42"
+              viewBox="0 0 64 64"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              aria-hidden="true"
+            >
+              <circle cx="32" cy="32" r="16" stroke="#F8FAFC" strokeOpacity="0.92" strokeWidth="2" />
+              <path
+                d="M 20 32 A 12 12 0 0 1 44 32"
+                stroke="#F8FAFC"
+                strokeOpacity="0.75"
+                strokeWidth="2"
+                strokeLinecap="round"
+              />
+              <circle cx="44" cy="32" r="3.1" fill="#F8FAFC" fillOpacity="0.95" />
+              <path
+                d="M 27 18 C 37 20 45 28 46 38"
+                stroke="#F8FAFC"
+                strokeOpacity="0.35"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+              />
+            </svg>
           </div>
           <div>
             <h3 className="text-lg font-semibold text-[#F8FAFC] leading-tight">NexaLedger</h3>
@@ -47,14 +71,14 @@ const Sidebar: React.FC = () => {
             <NavLink
               key={item.id}
               to={item.path}
-              className={({ isActive }) => 
-                `relative w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-colors duration-200 text-right ${
+              className={({ isActive }) =>
+                `relative w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-colors duration-200 text-right focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/35 focus-visible:ring-offset-0 active:scale-[0.98] ${
                   isActive
                     ? 'bg-white/6 text-[#F8FAFC] border-l-4 border-emerald-500/90 shadow-sm'
                     : 'text-[#94A3B8] hover:bg-white/3'
                 }`
-
               }
+
               aria-label={item.label}
             >
 

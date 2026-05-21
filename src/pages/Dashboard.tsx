@@ -67,7 +67,7 @@ const Dashboard: React.FC = () => {
               </svg>
             </div>
             <div>
-              <h3 className="text-lg font-semibold text-[#F8FAFC]">الإيرادات</h3>
+              <h3 className="text-lg font-semibold text-stone-200">الإيرادات</h3>
             </div>
           </div>
           <div className="text-2xl font-semibold mb-1 tabular-nums tracking-tight text-[#F8FAFC]">
@@ -88,7 +88,7 @@ const Dashboard: React.FC = () => {
               </svg>
             </div>
             <div>
-              <h3 className="text-lg font-semibold text-[#F8FAFC]">المصروفات</h3>
+              <h3 className="text-lg font-semibold text-stone-200 dark:text-stone-200">المصروفات</h3>
             </div>
           </div>
           <div className="text-2xl font-semibold mb-1 tabular-nums tracking-tight text-[#F8FAFC]">
@@ -109,7 +109,7 @@ const Dashboard: React.FC = () => {
               </svg>
             </div>
             <div>
-              <h3 className="text-lg font-semibold text-[#F8FAFC]">الرصيد المتاح</h3>
+              <h3 className="text-lg font-semibold text-stone-200 dark:text-stone-200">الرصيد المتاح</h3>
             </div>
           </div>
           <div className={`text-3xl font-black mb-1 tabular-nums tracking-tight ${
@@ -125,7 +125,7 @@ const Dashboard: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-6xl mx-auto">
         <Card className="p-6">
           <div className="flex items-center justify-between mb-3">
-            <h2 className="text-lg font-semibold leading-none tracking-tight text-[#F8FAFC]">الدخل مقابل المصروف</h2>
+<h2 className="text-lg font-semibold leading-none tracking-tight text-stone-200">الدخل مقابل المصروف</h2>
             <div className="text-sm text-[#94A3B8]">آخر 30 يوم</div>
           </div>
 

@@ -348,11 +348,20 @@ const AI: React.FC = () => {
               />
             ))}
 
-            {loading && (
-              <div className="mr-auto max-w-[75%] animate-pulse rounded-3xl border border-white/10 bg-white/5 px-4 py-3">
-                <div className="h-3 w-28 rounded bg-white/10" />
+          {loading && (
+              <div className="mr-auto max-w-[75%] rounded-3xl border border-white/10 bg-white/5 px-4 py-3">
+                <div className="flex items-center gap-3">
+                  <div className="relative h-3 w-3">
+                    <div className="absolute inset-0 rounded-full bg-emerald-400/60 animate-[pulse_1.6s_ease-in-out_infinite]" />
+                  </div>
+                  <div className="space-y-2">
+                    <div className="h-3 w-28 rounded bg-white/10 animate-pulse" />
+                    <div className="h-3 w-16 rounded bg-white/5 animate-pulse" />
+                  </div>
+                </div>
               </div>
             )}
+
           </div>
 
           <div className="mt-5 flex gap-3">

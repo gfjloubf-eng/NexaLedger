@@ -1,10 +1,17 @@
 import React from 'react';
 
+import {
+  motionNormal,
+  hoverLiftSoft,
+  hoverShadowSoft,
+} from '../../utils/motionTokens';
+
 type FinCardProps = {
   children: React.ReactNode;
   className?: string;
   subtleGlow?: boolean;
 };
+
 
 const FinCard: React.FC<FinCardProps> = ({ children, className, subtleGlow }) => {
   return (
@@ -16,11 +23,15 @@ const FinCard: React.FC<FinCardProps> = ({ children, className, subtleGlow }) =>
           ? 'shadow-[0_0_0_1px_rgba(255,255,255,0.06),0_0_40px_rgba(59,130,246,0.10)]'
           : '',
         // Premium hover feel (CSS-only, prefers-reduced-motion safe)
-        'transition-transform transition-shadow duration-300 ease-out',
-        'hover:-translate-y-0.5 hover:shadow-[0_18px_50px_rgba(0,0,0,0.28)]',
+        motionNormal,
+        hoverLiftSoft,
+        hoverShadowSoft,
+        // Keep separate will-change for rendering stability
         'will-change-transform',
+
         className ?? '',
       ].join(' ')}
+
     >
       {children}
     </div>

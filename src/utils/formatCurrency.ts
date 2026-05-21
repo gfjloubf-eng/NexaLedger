@@ -19,9 +19,10 @@ export function formatCurrency(value: number, opts: FormatCurrencyOpts = {}) {
 
     if (opts.showSymbol === false) {
       // remove currency symbol by joining non-currency parts
-      const parts = (nf as any).formatToParts(value) as Array<{ type: string; value: string }>;
+      const parts = nf.formatToParts(value);
       return parts.filter((p) => p.type !== 'currency').map((p) => p.value).join('').trim();
     }
+
 
     return nf.format(value);
   } catch {

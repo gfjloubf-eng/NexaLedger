@@ -1,7 +1,11 @@
 import React from 'react';
 
+import { motionFast, tactilePressSoft } from '../../utils/motionTokens';
+
+
 export type FinButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger' | 'icon';
 export type FinButtonSize = 'sm' | 'md' | 'lg';
+
 
 type FinButtonProps = {
   variant?: FinButtonVariant;
@@ -49,19 +53,21 @@ const FinButton: React.FC<FinButtonProps> = ({
   const isDisabled = Boolean(disabled || loading);
 
   const base =
-    'inline-flex items-center justify-center gap-2 rounded-2xl transition focus:outline-none active:scale-[0.99]';
+    `inline-flex items-center justify-center gap-2 rounded-2xl transition focus:outline-none ${tactilePressSoft}`;
+
 
   const focus =
     'focus-visible:ring-2 focus-visible:ring-blue-500/35 focus-visible:ring-offset-0';
 
   const motion =
     // prefers-reduced-motion safe: Tailwind only, no JS.
-    'transition-transform transition-shadow duration-200 ease-out will-change-transform';
+    motionFast;
 
   const finalVariant =
     variant === 'icon'
       ? `${variantStyles.icon} p-2 ${sizeStyles[size]}`
       : `${variantStyles[variant]} ${sizeStyles[size]}`;
+
 
   return (
     <button
