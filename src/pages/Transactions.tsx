@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 
 import { useTransactions } from '../context/TransactionContext';
 
@@ -102,6 +102,43 @@ const Transactions: React.FC = () => {
   const toastTimerRef = useRef<number | null>(null);
   const quickInputRef = useRef<HTMLInputElement | null>(null);
 
+  useEffect(() => {
+    const el = quickInputRef.current;
+    if (!el) return;
+
+    const focusIn = () => {
+      const vv = (window as unknown as { visualViewport?: VisualViewport }).visualViewport;
+      const viewportH = vv?.height ?? window.innerHeight;
+
+      // If keyboard is likely open, reserve additional space for the fixed CTA.
+      // (No redesign; purely mitigates overlap/jump.)
+      const keyboardLikelyOpen = viewportH < window.innerHeight * 0.85;
+      const root = document.documentElement;
+      if (keyboardLikelyOpen) {
+        root.style.setProperty('--cta-keyboard-offset', '92px');
+      } else {
+        root.style.setProperty('--cta-keyboard-offset', '0px');
+      }
+
+      // Best-effort: keep focused input visible without animated scroll jank.
+      try {
+        el.scrollIntoView({ block: 'center', behavior: 'instant' });
+      } catch {
+        // ignore
+      }
+    };
+
+    const focusOut = () => {
+      document.documentElement.style.setProperty('--cta-keyboard-offset', '0px');
+    };
+
+    el.addEventListener('focus', focusIn);
+    el.addEventListener('blur', focusOut);
+    return () => {
+      el.removeEventListener('focus', focusIn);
+      el.removeEventListener('blur', focusOut);
+    };
+  }, []);
 
   const [searchQuery, setSearchQuery] = useState('');
   const [categoryFilter, setCategoryFilter] =
@@ -191,11 +228,36 @@ const Transactions: React.FC = () => {
     }
   };
 
+  const insightTx = useMemo(() => {
+    return transactions.map((tx) => ({
+      id: tx.id,
+      title: tx.title,
+      amount: tx.amount,
+      type: tx.type,
+      category: tx.category,
+      created_at: (tx as InsightTransaction).created_at,
+    }));
+  }, [transactions]);
+
+  const insightNow = useMemo(() => new Date(), []);
+
+  const insights = useMemo(() => {
+    return financialInsightEngine.generate({
+      transactions: insightTx as unknown as InsightTransaction[],
+      now: insightNow,
+    });
+  }, [insightTx, insightNow]);
+
+  const whispers = useMemo(() => {
+    return financialInsightToWhispers(insights);
+  }, [insights]);
+
   const hasData = filteredTransactions.length > 0;
   const hasAnyTx = transactions.length > 0;
 
   return (
-    <div dir="rtl" className="max-w-6xl mx-auto space-y-7 py-8">
+    <div dir="rtl" className="max-w-6xl mx-auto space-y-7 py-8 pb-[calc(3.5rem+env(safe-area-inset-bottom))]">
+
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
         <div>
@@ -528,38 +590,17 @@ const Transactions: React.FC = () => {
               </div>
 
               <div className="relative mt-3">
-                {(() => {
-                  const insightTx = transactions.map((tx) => ({
-                    id: tx.id,
-                    title: tx.title,
-                    amount: tx.amount,
-                    type: tx.type,
-                    category: tx.category,
-                    created_at: (tx as InsightTransaction).created_at,
-                  }));
-
-                  const now = new Date();
-                  const insights = financialInsightEngine.generate({
-                    transactions: insightTx as unknown as InsightTransaction[],
-                    now,
-                  });
-
-                  const whispers = financialInsightToWhispers(insights);
-
-                  return (
-                    <div className="space-y-2">
-                      {whispers.length === 0 ? (
-                        <div className="text-sm leading-relaxed text-zinc-400">لم يتم تسجيل إشارات كافية بعد.</div>
-                      ) : (
-                        whispers.slice(0, 1).map((w) => (
-                          <div key={w.id} className="text-sm leading-relaxed text-zinc-200/90">
-                            {w.message}
-                          </div>
-                        ))
-                      )}
-                    </div>
-                  );
-                })()}
+                <div className="space-y-2">
+                  {whispers.length === 0 ? (
+                    <div className="text-sm leading-relaxed text-zinc-400">لم يتم تسجيل إشارات كافية بعد.</div>
+                  ) : (
+                    whispers.slice(0, 1).map((w) => (
+                      <div key={w.id} className="text-sm leading-relaxed text-zinc-200/90">
+                        {w.message}
+                      </div>
+                    ))
+                  )}
+                </div>
               </div>
             </Card>
           </div>
@@ -567,24 +608,7 @@ const Transactions: React.FC = () => {
           <div className="md:col-span-1">
             <InsightWhisperCard
               title="مؤشرات مالية هادئة"
-              insights={(() => {
-                const insightTx = transactions.map((tx) => ({
-                  id: tx.id,
-                  title: tx.title,
-                  amount: tx.amount,
-                  type: tx.type,
-                  category: tx.category,
-                  created_at: (tx as InsightTransaction).created_at,
-                }));
-
-                const now = new Date();
-                const insights = financialInsightEngine.generate({
-                  transactions: insightTx as unknown as InsightTransaction[],
-                  now,
-                });
-
-                return financialInsightToWhispers(insights);
-              })()}
+              insights={whispers}
             />
           </div>
         </div>
@@ -599,8 +623,9 @@ const Transactions: React.FC = () => {
           showToast({ kind: 'success', message: 'جاهز للإضافة السريعة' });
         }}
 
-        className="fixed bottom-6 left-6 sm:left-10 z-50 py-4 px-5"
+        className="fixed bottom-[calc(1.5rem+env(safe-area-inset-bottom))] left-6 sm:left-10 z-50 py-4 px-5"
       >
+
         + إضافة
       </Button>
     </div>

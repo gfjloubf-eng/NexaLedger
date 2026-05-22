@@ -175,7 +175,8 @@ const FinSearchOverlay: React.FC<{ open: boolean; onOpenChange: (v: boolean) => 
             ) : null}
           </div>
 
-          <div className="p-3 sm:p-4 max-h-[56vh] overflow-auto">
+          <div className="p-3 sm:p-4 max-h-[56vh] overflow-auto pb-[calc(env(safe-area-inset-bottom)+0px)]">
+
             {filtered.length === 0 ? (
               <div className="py-12 text-center">
                 <div className="text-4xl">🫥</div>

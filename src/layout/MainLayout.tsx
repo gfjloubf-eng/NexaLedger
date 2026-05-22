@@ -42,10 +42,14 @@ const MainLayout: React.FC = () => {
 
         {/* MOBILE NOTICE */}
         {isMobile && (
-          <div className="fixed top-4 right-4 z-20 rounded-xl bg-slate-900 px-4 py-2 text-sm text-white shadow-lg lg:hidden">
+          <div
+            className="fixed top-[calc(1rem+env(safe-area-inset-top))] right-4 z-20 rounded-xl bg-slate-900 px-4 py-2 text-sm text-white shadow-lg lg:hidden"
+            aria-hidden="true"
+          >
             افتح المشروع من الكمبيوتر مؤقتًا
           </div>
         )}
+
 
         {/* TOP BAR */}
         <header className="hidden lg:flex fixed top-0 right-0 left-0 h-16 items-center justify-end px-8 z-20">
@@ -69,12 +73,71 @@ const MainLayout: React.FC = () => {
         </div>
 
         {/* MAIN CONTENT */}
-        <main className="relative z-[1] lg:mr-64 p-6 pt-20">
+        <main className="relative z-[1] lg:mr-64 p-6 pt-20 pb-[calc(4.25rem+env(safe-area-inset-bottom))] lg:pb-6">
           <Outlet />
         </main>
+
+        {/* MOBILE BOTTOM NAV */}
+        <nav
+          dir="rtl"
+          className="fixed bottom-0 right-0 left-0 z-50 lg:hidden border-t border-white/6 bg-[rgba(15,23,42,0.78)] backdrop-blur-xl"
+          aria-label="Bottom Navigation"
+        >
+          <div className="flex items-center justify-around px-2 pt-2 pb-[calc(env(safe-area-inset-bottom)+0.45rem)]">
+            {/* Dashboard */}
+            <a
+              href="#/"
+              className="flex flex-col items-center justify-center gap-1 w-full text-center"
+              aria-label="لوحة التحكم"
+            >
+              <span className="text-lg leading-none" aria-hidden>
+                🏠
+              </span>
+              <span className="text-[11px] text-[#94A3B8]">لوحة</span>
+            </a>
+
+            {/* Transactions */}
+            <a
+              href="#/transactions"
+              className="flex flex-col items-center justify-center gap-1 w-full text-center"
+              aria-label="المعاملات"
+            >
+              <span className="text-lg leading-none" aria-hidden>
+                💳
+              </span>
+              <span className="text-[11px] text-[#94A3B8]">معاملات</span>
+            </a>
+
+            {/* Reports */}
+            <a
+              href="#/reports"
+              className="flex flex-col items-center justify-center gap-1 w-full text-center"
+              aria-label="التقارير"
+            >
+              <span className="text-lg leading-none" aria-hidden>
+                📊
+              </span>
+              <span className="text-[11px] text-[#94A3B8]">تقارير</span>
+            </a>
+
+            {/* Settings */}
+            <a
+              href="#/settings"
+              className="flex flex-col items-center justify-center gap-1 w-full text-center"
+              aria-label="الإعدادات"
+            >
+              <span className="text-lg leading-none" aria-hidden>
+                ⚙️
+              </span>
+              <span className="text-[11px] text-[#94A3B8]">إعدادات</span>
+            </a>
+          </div>
+        </nav>
+
       </div>
     </SettingsProvider>
   );
 };
 
 export default MainLayout;
+

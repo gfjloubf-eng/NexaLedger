@@ -1,7 +1,27 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Mobile-native stability defaults (no visual redesign) */
+html, body {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+  overscroll-behavior-x: none;
+}
+
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html:focus-within {
+    scroll-behavior: auto;
+  }
+}
+
  /* Minimized - Tailwind handles layout/effects. Keep ticks for visual. */
+
 
 .ticks {
   position: relative;
