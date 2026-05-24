@@ -10,7 +10,7 @@ import { Card } from '../components/ui';
 
 
 const Dashboard: React.FC = () => {
-  const { transactions } = useTransactions();
+  const { transactions, loading } = useTransactions();
 
   const totals = useMemo(() => {
     const income = transactions
@@ -125,15 +125,15 @@ const Dashboard: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-6xl mx-auto">
         <Card className="p-6">
           <div className="flex items-center justify-between mb-3">
-<h2 className="text-lg font-semibold leading-none tracking-tight text-stone-200">الدخل مقابل المصروف</h2>
+<h2 className="text-lg font-semibold leading-none tracking-tight text-[#F8FAFC]">الدخل مقابل المصروف</h2>
             <div className="text-sm text-[#94A3B8]">آخر 30 يوم</div>
           </div>
 
-          {!hasData ? (
+          {!hasData && !loading ? (
             <div className="min-h-[260px]">
-              <FinEmptyState
+<FinEmptyState
                 title="لا توجد بيانات بعد"
-                subtitle="أضف عملياتك في قسم المعاملات لبدء عرض التحليلات."
+subtitle="أضف أول عملية في المعاملات ليبدأ عرض التحليلات بهدوء وبشكل متزن."
                 icon="📊"
                 actionLabel="ابدأ الآن"
                 onAction={() => {

@@ -1,0 +1,186 @@
+/* Print/PDF stability layer (RTL-safe, calm, low-density) */
+
+.nexaledger-print-surface {
+  background: transparent;
+}
+
+.no-print {
+  /* default visibility; hidden in print below */
+}
+
+.print-header {
+  margin-bottom: 14px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.35);
+}
+
+.print-title {
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.print-period {
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.print-range {
+  font-size: 12px;
+  opacity: 0.85;
+}
+
+.print-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.print-kv {
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  border-radius: 12px;
+  padding: 10px;
+}
+
+.print-k {
+  font-size: 12px;
+  opacity: 0.9;
+  margin-bottom: 6px;
+}
+
+.print-v {
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.print-section {
+  margin-top: 16px;
+}
+
+.print-section-title {
+  font-size: 14px;
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+
+.print-cat-list {
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.print-cat-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 12px;
+  border-top: 1px solid rgba(148, 163, 184, 0.18);
+}
+
+.print-cat-row:first-child {
+  border-top: none;
+}
+
+.print-cat-name {
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.print-cat-amt {
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.print-footnote {
+  font-size: 11px;
+  opacity: 0.8;
+  margin-top: 8px;
+}
+
+.print-empty {
+  font-size: 12px;
+  opacity: 0.8;
+  padding: 8px 0;
+}
+
+.print-table-wrap {
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.print-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.print-table thead th {
+  font-size: 12px;
+  font-weight: 700;
+  padding: 10px;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.25);
+}
+
+.print-table tbody td {
+  font-size: 12px;
+  padding: 10px;
+  border-top: 1px solid rgba(148, 163, 184, 0.18);
+  vertical-align: top;
+}
+
+.print-table tbody tr {
+  page-break-inside: avoid;
+}
+
+.print-cell {
+  word-break: break-word;
+}
+
+.print-amt {
+  text-align: start;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.print-loading {
+  font-size: 12px;
+  opacity: 0.8;
+}
+
+@media print {
+  /* Remove app chrome and keep only the print surface */
+  body {
+    background: #ffffff !important;
+    color: #0f172a !important;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+
+  .nexaledger-print-surface {
+    padding: 0 !important;
+  }
+
+  /* Ensure RTL alignment in printed tables */
+  html,
+  body,
+  .nexaledger-print-surface {
+    direction: rtl !important;
+  }
+
+  /* Calm colors on paper */
+  .print-kv,
+  .print-cat-list,
+  .print-table-wrap {
+    border-color: rgba(15, 23, 42, 0.2) !important;
+  }
+
+  .print-table thead th {
+    background: transparent !important;
+  }
+}
+

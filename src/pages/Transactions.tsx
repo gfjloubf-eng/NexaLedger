@@ -13,13 +13,12 @@ import { financialInsightEngine } from '../systems/financial-insights/insightEng
 import type { Transaction as InsightTransaction } from '../systems/financial-insights/transactionCompat';
 import { financialInsightToWhispers } from '../utils/financialInsightToWhispers';
 import InsightWhisperCard from '../components/ui/InsightWhisperCard';
+import { useFinToast } from '../components/ui/useFinToast';
+import FinModal from '../components/ui/FinModal';
 
 type CategoryFilterValue = 'all' | TransactionCategory;
 
 
-type ToastKind = 'success' | 'error';
-
-type ToastState = { kind: ToastKind; message: string } | null;
 
 const CATEGORY_OPTIONS: Array<{ value: CategoryFilterValue; label: string }> = [
   { value: 'all', label: 'الكل' },
@@ -55,7 +54,6 @@ const categoryIcon = (category: string) => {
 };
 
 const formatAmount = (amount: number) => {
-  // Centralized currency formatting util — keeps formatting consistent and localizable.
   return formatCurrency(amount, { locale: 'ar-SA', currency: 'SAR' });
 };
 
@@ -63,15 +61,13 @@ const typeBadge = (type: TransactionType) => {
   if (type === 'income') {
     return {
       label: 'دخل',
-      className:
-        'bg-emerald-500/15 text-emerald-200 ring-1 ring-emerald-400/20',
+      className: 'bg-emerald-500/15 text-emerald-200 ring-1 ring-emerald-400/20',
     };
   }
 
   return {
     label: 'مصروف',
-    className:
-      'bg-rose-500/15 text-rose-200 ring-1 ring-rose-400/20',
+    className: 'bg-rose-500/15 text-rose-200 ring-1 ring-rose-400/20',
   };
 };
 
@@ -94,33 +90,52 @@ const SkeletonRow = () => {
 };
 
 const Transactions: React.FC = () => {
-  const { transactions, addTransaction, deleteTransaction } =
-    useTransactions();
+  const { transactions, addTransaction, deleteTransaction, loading } = useTransactions();
+
+  const pushToast = useFinToast();
 
   const [quickInput, setQuickInput] = useState('');
-  const [toast, setToast] = useState<ToastState>(null);
-  const toastTimerRef = useRef<number | null>(null);
   const quickInputRef = useRef<HTMLInputElement | null>(null);
+
+  const [deleteTarget, setDeleteTarget] = useState<{ id: string; title?: string } | null>(null);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+
 
   useEffect(() => {
     const el = quickInputRef.current;
     if (!el) return;
 
+    const root = document.documentElement;
+    let lastKeyboardLikelyOpen: boolean | null = null;
+    let pending = false;
+
+    const applyKeyboardOffset = (keyboardLikelyOpen: boolean) => {
+      // Thresholding: avoid oscillation during multi-step keyboard transitions.
+      if (lastKeyboardLikelyOpen === keyboardLikelyOpen) return;
+      lastKeyboardLikelyOpen = keyboardLikelyOpen;
+
+      root.style.setProperty(
+        '--cta-keyboard-offset',
+        keyboardLikelyOpen ? '92px' : '0px'
+      );
+    };
+
     const focusIn = () => {
+      if (pending) return;
+      pending = true;
+
       const vv = (window as unknown as { visualViewport?: VisualViewport }).visualViewport;
       const viewportH = vv?.height ?? window.innerHeight;
-
-      // If keyboard is likely open, reserve additional space for the fixed CTA.
-      // (No redesign; purely mitigates overlap/jump.)
       const keyboardLikelyOpen = viewportH < window.innerHeight * 0.85;
-      const root = document.documentElement;
-      if (keyboardLikelyOpen) {
-        root.style.setProperty('--cta-keyboard-offset', '92px');
-      } else {
-        root.style.setProperty('--cta-keyboard-offset', '0px');
-      }
 
-      // Best-effort: keep focused input visible without animated scroll jank.
+      // Defer applying to reduce jitter during immediate focus changes.
+      queueMicrotask(() => {
+        applyKeyboardOffset(keyboardLikelyOpen);
+        pending = false;
+      });
+
       try {
         el.scrollIntoView({ block: 'center', behavior: 'instant' });
       } catch {
@@ -128,9 +143,17 @@ const Transactions: React.FC = () => {
       }
     };
 
+
     const focusOut = () => {
-      document.documentElement.style.setProperty('--cta-keyboard-offset', '0px');
+      // Keep calm: only reset when we're sure keyboard is closed.
+      const vv = (window as unknown as { visualViewport?: VisualViewport }).visualViewport;
+      const viewportH = vv?.height ?? window.innerHeight;
+      const keyboardLikelyOpen = viewportH < window.innerHeight * 0.85;
+      if (!keyboardLikelyOpen) {
+        document.documentElement.style.setProperty('--cta-keyboard-offset', '0px');
+      }
     };
+
 
     el.addEventListener('focus', focusIn);
     el.addEventListener('blur', focusOut);
@@ -141,48 +164,26 @@ const Transactions: React.FC = () => {
   }, []);
 
   const [searchQuery, setSearchQuery] = useState('');
-  const [categoryFilter, setCategoryFilter] =
-    useState<CategoryFilterValue>('all');
+  const [categoryFilter, setCategoryFilter] = useState<CategoryFilterValue>('all');
   const [typeFilter, setTypeFilter] = useState<'all' | 'income' | 'expense'>('all');
 
-  const showToast = (next: ToastState) => {
-    setToast(next);
-    if (toastTimerRef.current) window.clearTimeout(toastTimerRef.current);
-    toastTimerRef.current = window.setTimeout(() => setToast(null), 2600);
-  };
-
   const handleQuickAdd = async () => {
+
     const parsed = parseQuickAdd(quickInput);
     if (!parsed) {
-      showToast({
-        kind: 'error',
-        message: 'جرّب صيغة مثل: 250 طعام',
-      });
+      pushToast({ type: 'error', message: 'جرّب صيغة مثل: 250 طعام' });
       return;
     }
 
     if (!Number.isFinite(parsed.amount) || parsed.amount <= 0) {
-      showToast({
-        kind: 'error',
-        message: 'المبلغ غير صالح',
-      });
+      pushToast({ type: 'error', message: 'المبلغ غير صالح' });
       return;
     }
 
-    const category: TransactionCategory = isCategory(parsed.category)
-      ? parsed.category
-      : 'عام';
-
+    const category: TransactionCategory = isCategory(parsed.category) ? parsed.category : 'عام';
     const type: TransactionType = parsed.type;
 
     try {
-      console.log('Transactions form submit: calling addTransaction with', {
-        id: crypto.randomUUID(),
-        title: parsed.title,
-        amount: parsed.amount,
-        type,
-        category,
-      });
       await addTransaction({
         id: crypto.randomUUID(),
         title: parsed.title,
@@ -192,13 +193,9 @@ const Transactions: React.FC = () => {
       });
 
       setQuickInput('');
-      showToast({ kind: 'success', message: 'تمت الإضافة' });
-    } catch (error) {
-      console.error('Transactions form submit caught error:', error);
-      showToast({
-        kind: 'error',
-        message: 'تعذر حفظ العملية',
-      });
+      pushToast({ type: 'success', message: 'تمت الإضافة' });
+    } catch {
+      pushToast({ type: 'error', message: 'تعذر حفظ العملية' });
     }
   };
 
@@ -206,8 +203,7 @@ const Transactions: React.FC = () => {
     const q = searchQuery.trim().toLowerCase();
 
     return transactions.filter((tx) => {
-      const matchesCategory =
-        categoryFilter === 'all' ? true : tx.category === categoryFilter;
+      const matchesCategory = categoryFilter === 'all' ? true : tx.category === categoryFilter;
       if (!matchesCategory) return false;
 
       const matchesType = typeFilter === 'all' ? true : tx.type === typeFilter;
@@ -219,14 +215,34 @@ const Transactions: React.FC = () => {
     });
   }, [transactions, searchQuery, categoryFilter, typeFilter]);
 
-  const handleDelete = async (id: string) => {
+  const confirmDelete = async (id: string) => {
     try {
       await deleteTransaction(id);
-      showToast({ kind: 'success', message: 'تم الحذف' });
+      pushToast({ type: 'success', message: 'تمت إزالة العملية من السجل.' });
+      return true;
     } catch {
-      showToast({ kind: 'error', message: 'تعذر حذف العملية' });
+      pushToast({ type: 'error', message: 'تعذر حذف العملية. حاول مرة أخرى بهدوء.' });
+      return false;
     }
   };
+
+
+  const handleConfirmDelete = async () => {
+    if (!deleteTarget) return;
+    if (isDeleting) return;
+
+    setIsDeleting(true);
+    try {
+      const ok = await confirmDelete(deleteTarget.id);
+      if (ok) {
+        setIsDeleteModalOpen(false);
+        setDeleteTarget(null);
+      }
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
 
   const insightTx = useMemo(() => {
     return transactions.map((tx) => ({
@@ -257,7 +273,6 @@ const Transactions: React.FC = () => {
 
   return (
     <div dir="rtl" className="max-w-6xl mx-auto space-y-7 py-8 pb-[calc(3.5rem+env(safe-area-inset-bottom))]">
-
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
         <div>
@@ -267,15 +282,12 @@ const Transactions: React.FC = () => {
           <p className="mt-2 text-zinc-600/90 dark:text-zinc-200/90 text-sm">
             بحث سريع، فلترة ذكية، وإضافات فورية — بأسلوب احترافي.
           </p>
-
         </div>
 
         <div className="flex items-center gap-3">
-            <div className="hidden md:flex items-center gap-2 rounded-2xl border border-white/5 bg-white/[0.02] dark:bg-zinc-950/60 px-4 py-2 backdrop-blur-xl">
+          <div className="hidden md:flex items-center gap-2 rounded-2xl border border-white/5 bg-white/[0.02] dark:bg-zinc-950/60 px-4 py-2 backdrop-blur-xl">
             <span className="text-zinc-700 text-sm dark:text-zinc-200/90">عدد المعاملات</span>
-            <span className="text-zinc-200 font-semibold">
-              {transactions.length}
-            </span>
+            <span className="text-zinc-200 font-semibold">{transactions.length}</span>
           </div>
         </div>
       </div>
@@ -300,15 +312,20 @@ const Transactions: React.FC = () => {
               { label: 'اكتشاف ارتفاع الإنفاق' },
               { label: 'تنبيه ميزانية' },
             ].map((x) => (
-              <span key={x.label} className="px-3 py-1 rounded-full text-xs bg-zinc-100/80 border border-zinc-200/60 text-zinc-800 dark:text-[#F8FAFC]">{x.label}</span>
+              <span
+                key={x.label}
+                className="px-3 py-1 rounded-full text-xs bg-zinc-100/80 border border-zinc-200/60 text-zinc-800 dark:text-[#F8FAFC]"
+              >
+                {x.label}
+              </span>
             ))}
           </div>
         </Card>
 
         <Card className="p-5">
-            <div className="text-sm text-zinc-900 dark:text-zinc-100">الحالة المالية</div>
-              <div className="text-3xl font-semibold mt-2 text-zinc-800 dark:text-zinc-100">92</div>
-              <div className="text-xs text-neutral-800 dark:text-neutral-800">مؤشر مبسط — بناءً على النشاط الحديث.</div>
+          <div className="text-sm text-zinc-900 dark:text-zinc-100">الحالة المالية</div>
+          <div className="text-3xl font-semibold mt-2 text-zinc-800 dark:text-zinc-100">92</div>
+          <div className="text-xs text-neutral-800 dark:text-neutral-800">مؤشر مبسط — بناءً على النشاط الحديث.</div>
           <div className="mt-4">
             <div className="h-2 rounded-full bg-white/10 overflow-hidden">
               <div className="h-full w-[92%] bg-[#2563EB]" />
@@ -323,21 +340,14 @@ const Transactions: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
           <div className="md:col-span-2">
             <label className="block text-xs text-zinc-600 dark:text-zinc-200/90 mb-2">بحث بالاسم/الفئة</label>
-            <Input
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="ابحث بالمعنى…"
-              dir="rtl"
-            />
+            <Input value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder="ابحث بالمعنى…" dir="rtl" />
           </div>
 
           <div>
             <label className="block text-xs text-zinc-600 dark:text-zinc-200/90 mb-2">النوع</label>
             <select
               value={typeFilter}
-              onChange={(e) =>
-                setTypeFilter(e.target.value as 'all' | 'income' | 'expense')
-              }
+              onChange={(e) => setTypeFilter(e.target.value as 'all' | 'income' | 'expense')}
               className="input"
               dir="rtl"
             >
@@ -353,9 +363,7 @@ const Transactions: React.FC = () => {
             <label className="block text-xs text-zinc-600 dark:text-zinc-200/90 mb-2">الفئة</label>
             <select
               value={categoryFilter}
-              onChange={(e) =>
-                setCategoryFilter(e.target.value as CategoryFilterValue)
-              }
+              onChange={(e) => setCategoryFilter(e.target.value as CategoryFilterValue)}
               className="input"
               dir="rtl"
             >
@@ -375,7 +383,7 @@ const Transactions: React.FC = () => {
                 setSearchQuery('');
                 setCategoryFilter('all');
                 setTypeFilter('all');
-                showToast({ kind: 'success', message: 'تمت إعادة الضبط' });
+                pushToast({ type: 'success', message: 'تمت إعادة الضبط' });
               }}
               className="w-full md:w-48 btn-ghost"
             >
@@ -387,12 +395,9 @@ const Transactions: React.FC = () => {
             <label className="block text-xs text-zinc-600 dark:text-zinc-200/90 mb-2">تصدير</label>
             <Button
               type="button"
-              onClick={() =>
-                showToast({
-                  kind: 'success',
-                  message: 'زر التصدير — UI فقط',
-                })
-              }
+              onClick={() => {
+                // UI-only affordance: keep interaction calm; no success toast.
+              }}
               variant="secondary"
               className="w-full md:w-48"
             >
@@ -420,18 +425,12 @@ const Transactions: React.FC = () => {
                   if (e.key === 'Enter') void handleQuickAdd();
                 }}
               />
-
-
             </div>
           </div>
 
           <div className="lg:w-56">
             <label className="block text-xs text-zinc-600 dark:text-zinc-200/90 mb-2">&nbsp;</label>
-            <Button
-              onClick={() => void handleQuickAdd()}
-              disabled={!quickInput.trim()}
-              className="w-full py-4"
-            >
+            <Button onClick={() => void handleQuickAdd()} disabled={!quickInput.trim()} className="w-full py-4">
               إضافة
             </Button>
           </div>
@@ -439,31 +438,29 @@ const Transactions: React.FC = () => {
 
         <div className="relative mt-3 flex items-center justify-between gap-3">
           <div className="text-xs text-zinc-700 dark:text-zinc-200/90">دعم إضافة سريعة بدون تعقيد.</div>
-          {toast ? (
-            <div className={`text-sm font-semibold ${toast.kind === 'success' ? 'text-emerald-200' : 'text-rose-200'}`}>{toast.message}</div>
-          ) : (
-            <div className="text-xs text-zinc-600/90">&nbsp;</div>
-
-
-          )}
+          <div className="text-xs text-zinc-600/90">&nbsp;</div>
         </div>
       </Card>
 
       {/* Transaction List */}
       <Card className="p-5 dark:bg-zinc-950/60 border border-white/5 backdrop-blur-xl">
         <div className="flex items-center justify-between mb-4">
-
           <div>
             <div className="text-sm text-zinc-400 dark:text-zinc-200/90">قائمة المعاملات</div>
-            <div className="text-lg font-semibold text-zinc-100 mt-1 tracking-tight">{hasAnyTx ? 'عرض سريع ومُرتّب' : 'ابدأ بإضافة معاملات'}</div>
+            <div className="text-lg font-semibold text-zinc-100 mt-1 tracking-tight">
+              {hasAnyTx ? 'عرض سريع ومُرتّب' : 'ابدأ بإضافة معاملات'}
+            </div>
           </div>
           <div className="text-xs text-zinc-300 dark:text-zinc-200/90 tabular-nums">{filteredTransactions.length} نتيجة</div>
         </div>
 
-
-
-
-        {!hasData ? (
+        {loading ? (
+          <div className="space-y-3 mt-4">
+            <SkeletonRow />
+            <SkeletonRow />
+            <SkeletonRow />
+          </div>
+        ) : !hasData ? (
           <div className="py-10">
             <div className="mx-auto max-w-md text-center">
               <div className="w-14 h-14 rounded-2xl mx-auto bg-white/[0.02] border border-white/5 flex items-center justify-center">
@@ -479,9 +476,7 @@ const Transactions: React.FC = () => {
               </div>
 
               <div className="mt-2 text-sm text-zinc-400 leading-relaxed">
-                {hasAnyTx
-                  ? 'جرّب تعديل كلمات البحث أو الفلاتر'
-                  : 'ابدأ أول سجل مالي بهدوء وتنظيم'}
+                {hasAnyTx ? 'جرّب تعديل كلمات البحث أو الفلاتر' : 'ابدأ أول سجل مالي بهدوء وتنظيم'}
               </div>
 
               {hasAnyTx ? (
@@ -499,7 +494,7 @@ const Transactions: React.FC = () => {
                   <button
                     onClick={() => {
                       setQuickInput('250 طعام');
-                      showToast({ kind: 'success', message: 'تم اقتراح صيغة' });
+                      pushToast({ type: 'success', message: 'تم اقتراح صيغة' });
                     }}
                     className="px-5 py-3 rounded-xl bg-white/[0.03] border border-white/10 text-zinc-100 font-semibold hover:bg-white/[0.06] transition"
                   >
@@ -523,9 +518,7 @@ const Transactions: React.FC = () => {
                       {categoryIcon(tx.category ?? 'عام')}
                     </div>
                     <div>
-                      <div className="text-zinc-100 font-semibold tracking-tight">
-                        {tx.title}
-                      </div>
+                      <div className="text-zinc-100 font-semibold tracking-tight">{tx.title}</div>
                       <div className="text-xs text-zinc-400 mt-1">
                         {tx.category ?? 'عام'} • {badge.label}
                       </div>
@@ -533,11 +526,7 @@ const Transactions: React.FC = () => {
                   </div>
 
                   <div className="flex items-center justify-between sm:justify-end gap-3">
-                    <span
-                      className={`text-xs px-3 py-1 rounded-full ${badge.className}`}
-                    >
-                      {badge.label}
-                    </span>
+                    <span className={`text-xs px-3 py-1 rounded-full ${badge.className}`}>{badge.label}</span>
                     <div className="text-right">
                       <div
                         className={`font-semibold tracking-tight leading-none whitespace-nowrap tabular-nums ${
@@ -547,19 +536,21 @@ const Transactions: React.FC = () => {
                         {tx.type === 'expense' ? '-' : '+'}
                         {formatAmount(Math.abs(tx.amount))}
                       </div>
-                      <div className="text-xs text-zinc-700 dark:text-zinc-200/90 mt-0.5">
-                        معاملة
-                      </div>
+                      <div className="text-xs text-zinc-700 dark:text-zinc-200/90 mt-0.5">معاملة</div>
                     </div>
 
-                    <button
-                      onClick={() => void handleDelete(tx.id)}
-                      className="opacity-0 group-hover:opacity-100 transition px-3 py-2 rounded-xl border border-white/5 bg-white/[0.02] hover:border-white/10 hover:bg-white/[0.04] text-rose-400 hover:text-rose-300"
+<button
+                      onClick={() => {
+                        setDeleteTarget({ id: tx.id, title: tx.title });
+                        setIsDeleteModalOpen(true);
+                      }}
+                      className="opacity-0 group-hover:opacity-100 focus-visible:opacity-100 focus-within:opacity-100 transition px-3 py-2 rounded-xl border border-white/5 bg-white/[0.02] hover:border-white/10 hover:bg-white/[0.04] text-rose-400 focus-visible:ring-2 focus-visible:ring-rose-400/40 focus-visible:ring-offset-0"
                       aria-label="حذف"
                       type="button"
                     >
                       حذف
                     </button>
+
                   </div>
                 </div>
               );
@@ -567,16 +558,8 @@ const Transactions: React.FC = () => {
           </div>
         )}
 
-        {/* Loading skeletons (visual only; uses existing local state) */}
-        {!hasAnyTx && (
-          <div className="space-y-3 mt-4">
-            <SkeletonRow />
-            <SkeletonRow />
-            <SkeletonRow />
-          </div>
-        )}
 
-        {/* Controlled Insight Surface(s) — calm, compact, lightweight */}
+
         <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-3">
           <div className="md:col-span-1">
             <Card className="p-4 border border-white/5 bg-white/[0.02] dark:bg-zinc-950/60 backdrop-blur-xl rounded-3xl overflow-hidden relative">
@@ -606,29 +589,60 @@ const Transactions: React.FC = () => {
           </div>
 
           <div className="md:col-span-1">
-            <InsightWhisperCard
-              title="مؤشرات مالية هادئة"
-              insights={whispers}
-            />
+            <InsightWhisperCard title="مؤشرات مالية هادئة" insights={whispers} />
           </div>
         </div>
-
       </Card>
+
+      <FinModal
+        isOpen={isDeleteModalOpen}
+        onClose={() => {
+          setIsDeleteModalOpen(false);
+          setDeleteTarget(null);
+        }}
+        title="تأكيد الإزالة"
+        description="سيتم إزالة العملية من السجل. يمكنك المتابعة أو التراجع بهدوء."
+        className="max-w-lg"
+      >
+        <div className="flex items-center justify-end gap-3">
+          <Button
+            type="button"
+            variant="secondary"
+            onClick={() => {
+              setIsDeleteModalOpen(false);
+              setDeleteTarget(null);
+            }}
+          >
+            التراجع بهدوء
+          </Button>
+          <Button
+            type="button"
+            disabled={isDeleting}
+            aria-busy={isDeleting}
+            onClick={() => {
+              void handleConfirmDelete();
+            }}
+            className="bg-rose-500/15 border border-rose-400/20 text-rose-200 hover:bg-rose-500/25 disabled:opacity-60 disabled:cursor-not-allowed"
+          >
+            المتابعة
+          </Button>
+
+        </div>
+      </FinModal>
 
       {/* Floating Quick Add Button */}
       <Button
         type="button"
         onClick={() => {
           quickInputRef.current?.focus();
-          showToast({ kind: 'success', message: 'جاهز للإضافة السريعة' });
+          pushToast({ type: 'success', message: 'جاهز للإضافة السريعة' });
         }}
-
-        className="fixed bottom-[calc(1.5rem+env(safe-area-inset-bottom))] left-6 sm:left-10 z-50 py-4 px-5"
+        className="fixed z-50 py-4 px-5 bottom-[calc(env(safe-area-inset-bottom)+1.25rem+var(--cta-keyboard-offset))] left-4 sm:left-8"
       >
-
         + إضافة
       </Button>
     </div>
+
   );
 };
 

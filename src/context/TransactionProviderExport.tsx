@@ -58,15 +58,15 @@ export function TransactionProvider({
       setLoading(true);
 
       try {
-        console.log('Fetching transactions from Supabase for user:', currentUser?.id);
         const { data, error } = await supabase
+
           .from('transactions')
           .select('id,description,amount,transaction_type,category,created_at')
           .eq('user_id', currentUser.id)
           .order('created_at', { ascending: false });
 
-        console.log('Fetch response data:', data);
-        console.log('Fetch response error:', error);
+        
+
 
         if (!error && data && mounted) {
           const fetched = (data as TransactionRow[]).map((r) =>
@@ -98,11 +98,13 @@ export function TransactionProvider({
   const addTransaction = useCallback<
     TransactionContextValue['addTransaction']
   >(async (transaction) => {
-    console.log('addTransaction called with:', transaction);
+    
+
 
     // optimistic add for immediate UX
     const clientId = transaction.id ?? crypto.randomUUID();
-    console.log('Optimistic update: adding transaction with clientId:', clientId);
+    
+
     setTransactions((prev) => [
       ...prev,
       {

@@ -1,33 +1,11 @@
-# TODO — Mobile Native Stabilization Phase (Phase 1)
+# TODO - Targeted cleanup refactor (Transactions.tsx)
 
-## Step 1 — Repo audit recap (done)
-- Identified candidate hotspots:
-  - `src/pages/Transactions.tsx` (keyboard + fixed CTA)
-  - `src/layout/MainLayout.tsx` (mobile fixed elements + padding)
-  - `src/components/ui/FinSearchOverlay.tsx` (overlay input + scroll height)
-  - `src/index.css` / `src/App.css` (global overflow-x containment)
-
-## Step 2 — Verify sidebar/mobile trigger code (pending)
-- Search for mobile sidebar/drawer/open/close patterns.
-
-## Step 3 — Add global overflow-x containment (pending)
-- Ensure no horizontal overflow/drift on real mobile widths.
-
-## Step 4 — Apply safe-area harmony for fixed elements (pending)
-- Update `MainLayout.tsx` and `Transactions.tsx` floating/fixed UI to respect `env(safe-area-inset-*)`.
-
-## Step 5 — Stabilize keyboard/input on Transactions (pending)
-- Ensure fixed CTA does not overlap typing.
-- Improve viewport behavior only if the code already supports it.
-
-## Step 6 — Stabilize overlay scrolling/height (pending)
-- Update `FinSearchOverlay.tsx` to use more stable viewport height and safe-area padding.
-
-## Step 7 — Run validation
-- `npm run build`
-- lint verification
-- manual mobile checks: 320/375/390/414, zero horizontal overflow, sidebar layering stability, keyboard stability.
-
-## Step 8 — Commit stable refinements only
-- Commit only after passing all validations.
+- [ ] 0) Inventory current remnants in `src/pages/Transactions.tsx` (toast state, delete UX, mobile CTA spacing, surface gradients, skeleton/empty-state tone, insight recompute boundaries).
+- [ ] 1) Toast unification: remove any local toast remnants (if any) and ensure all calls use `pushToast({type, message, title?})` only.
+- [ ] 2) Calm delete confirmation: add `FinModal` confirmation using emotionally safe wording and calm styling; delete only proceeds on confirm.
+- [ ] 3) Mobile surface harmony: adjust floating CTA position/spacing to honor safe-area + keyboard offset and avoid overlaps.
+- [ ] 4) Surface consistency cleanup: reduce decorative gradients/border drift; align row/card styling with `FinCard` philosophy while preserving calm spacing.
+- [ ] 5) Loading + empty-state discipline: standardize `SkeletonRow` calmness; reduce CTA spam and ensure stable empty-state layout.
+- [ ] 6) Final render discipline: ensure insights recompute only on meaningful transaction changes; avoid introducing dependencies on transient UI state.
+- [ ] 7) Validation: run `npm run build` and `npm run lint -- --max-warnings=0` and verify stable behavior + no RTL regressions.
 
