@@ -346,6 +346,7 @@ const Transactions: React.FC = () => {
           <div>
             <label className="block text-xs text-zinc-600 dark:text-zinc-200/90 mb-2">النوع</label>
             <select
+              aria-label="النوع"
               value={typeFilter}
               onChange={(e) => setTypeFilter(e.target.value as 'all' | 'income' | 'expense')}
               className="input"
@@ -409,7 +410,7 @@ const Transactions: React.FC = () => {
 
       {/* Quick Add */}
       <Card className="relative p-5 overflow-hidden">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_0%,rgba(59,130,246,0.06),transparent_70%),radial-gradient(circle_at_80%_30%,rgba(16,185,129,0.04),transparent_70%)] mix-blend-overlay pointer-events-none" />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_0%,rgba(16,185,129,0.06),transparent_72%),radial-gradient(circle_at_85%_20%,rgba(59,130,246,0.04),transparent_72%)] opacity-70 mix-blend-overlay pointer-events-none" />
         <div className="relative flex flex-col lg:flex-row lg:items-end gap-4">
           <div className="flex-1">
             <div className="text-sm text-zinc-700 dark:text-zinc-200/90">إضافة سريعة</div>
