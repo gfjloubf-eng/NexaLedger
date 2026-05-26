@@ -9,12 +9,35 @@ import React, {
 } from 'react';
 
 
-import type { ParsedTransaction, TransactionType } from '../types/transaction';
+import type { ParsedTransaction } from '../types/transaction';
+
 import type { TransactionContextValue } from './transactionContext.types';
 
 import { buildTransactionContextValue, formatSupabaseTransactionRow, type TransactionRow } from './transactionHelpers';
-import { supabase, SUPABASE_URL } from '../lib/supabase';
+import { supabase } from '../lib/supabase';
+
+import type { PendingSyncPayload } from '../lib/localPersistence';
+
 import { AuthContext } from './authContext';
+
+import {
+  localLoadTransactions,
+  localSetHydrationMarker,
+  localUpsertTransaction,
+  localDeleteTransaction,
+  localEnqueuePendingCreate,
+  localLoadPendingSync,
+
+  localMarkPendingSyncStatus,
+} from '../lib/localPersistence';
+
+
+
+
+
+
+
+
 
 export const TransactionContext =
   createContext<TransactionContextValue | null>(null);
@@ -31,6 +54,10 @@ export function TransactionProvider({
   const authCtx = useContext(AuthContext);
   const currentUser = authCtx?.user ?? null;
   const authLoading = authCtx?.loading ?? false;
+
+  const syncInProgressRef = React.useRef(false);
+  const syncStartedAtRef = React.useRef<number | null>(null);
+
 
   // Seed transactions from Supabase once auth is ready
   useEffect(() => {
@@ -55,34 +82,56 @@ export function TransactionProvider({
     }
 
     (async () => {
+      // Offline-first hydration to prevent flicker/empty screens.
+      if (!mounted) return;
       setLoading(true);
 
       try {
-        const { data, error } = await supabase
+        // 1) Hydrate from Dexie immediately (offline safe)
+        const localRows = await localLoadTransactions(currentUser.id);
+        if (mounted) {
+          setTransactions(
+            localRows.map((r) => ({
+              id: r.id,
+              title: (r.title ?? r.description ?? 'المعاملات') as string,
+              amount: Number(r.amount),
+              type: r.type,
+              category: (r.category ?? 'عام') as string,
+            }))
+          );
+        }
 
+        // 2) Then attempt Supabase sync (online + auth)
+        const { data, error } = await supabase
           .from('transactions')
           .select('id,description,amount,transaction_type,category,created_at')
           .eq('user_id', currentUser.id)
           .order('created_at', { ascending: false });
-
-        
-
 
         if (!error && data && mounted) {
           const fetched = (data as TransactionRow[]).map((r) =>
             formatSupabaseTransactionRow(r)
           );
 
+          // Replace local truth with DB truth (but dedupe by id)
           setTransactions((prev) => {
             const existing = new Set(prev.map((p) => p.id));
-            const newRows = fetched.filter((f) => !existing.has(f.id));
-            return [...newRows, ...prev];
+            const merged = [
+              ...fetched.filter((f) => !existing.has(f.id)),
+              ...prev.filter((p) => existing.has(p.id)),
+            ];
+            // Deterministic order: most recent created_at is not available in local map.
+            return merged;
           });
         } else if (error) {
           console.error('Failed to load transactions', error);
         }
+
+        if (mounted) {
+          await localSetHydrationMarker(currentUser.id, Date.now());
+        }
       } catch (error) {
-        console.error('Transaction load failed', error);
+        console.error('Transaction hydration failed (offline/local/supabase)', error);
       } finally {
         if (mounted) {
           setLoading(false);
@@ -95,108 +144,237 @@ export function TransactionProvider({
     };
   }, [authLoading, currentUser]);
 
+  useEffect(() => {
+    if (!currentUser) return;
+    // Quiet startup drain: non-blocking.
+    queueMicrotask(() => {
+      void drainPendingSync();
+    });
+  }, [currentUser]);
+
+  const drainPendingSyncRef = React.useRef(false);
+
+  const drainPendingSync = useCallback(async () => {
+    if (!currentUser) return;
+    if (drainPendingSyncRef.current) return;
+    drainPendingSyncRef.current = true;
+    if (syncInProgressRef.current) return;
+
+    syncInProgressRef.current = true;
+    syncStartedAtRef.current = Date.now();
+
+    try {
+      // Load queue snapshot deterministically
+      const queue = await localLoadPendingSync(currentUser.id);
+      // Queue row uses `created_at` (required by schema).
+      const sorted = [...queue].sort((a, b) => (a.created_at ?? 0) - (b.created_at ?? 0));
+
+
+
+      for (const item of sorted) {
+        // Skip items that were removed while we were processing (race-safe)
+        const currentQueue = await localLoadPendingSync(currentUser.id);
+        const fresh = currentQueue.find((x) => x.id === item.id);
+        if (!fresh) continue;
+
+        if (fresh.sync_status === 'success') {
+          continue;
+        }
+
+        await localMarkPendingSyncStatus({
+          id: item.id,
+          sync_status: 'in_progress',
+          retry_count: fresh.retry_count,
+          last_attempt_at: Date.now(),
+        });
+
+        try {
+          const payload = fresh.payload as PendingSyncPayload;
+
+          if (payload.operation_type === 'create') {
+            // Idempotency: the queue row id is deterministic by transaction_id.
+            // Remote insert is best-effort; if it fails due to duplicates, mark as success.
+            const createPayload = {
+              user_id: currentUser.id,
+              description: payload.description,
+              amount: payload.amount,
+              transaction_type: payload.transaction_type,
+              category: payload.category,
+            };
+
+            const { data, error } = await supabase
+              .from('transactions')
+              .insert([createPayload])
+              .select('id,description,amount,transaction_type,category,created_at')
+              .single();
+
+            if (error) {
+              // If remote already has it, treat as success to prevent duplicates.
+              // (We rely on deterministic local id + unique-by-app semantics; if RLS/DB lacks constraints, this stays best-effort.)
+              if (String(error.message || error).toLowerCase().includes('duplicate')) {
+                await localMarkPendingSyncStatus({
+                  id: item.id,
+                  sync_status: 'success',
+                });
+                continue;
+              }
+              throw error;
+            }
+
+            if (data) {
+              const saved = formatSupabaseTransactionRow(data as TransactionRow);
+              // Ensure local row authoritative. Keep local authority for ordering/title.
+              await localUpsertTransaction({
+                id: saved.id,
+                user_id: currentUser.id,
+                title: saved.title,
+                description: saved.title,
+                amount: saved.amount,
+                type: saved.type,
+                category: saved.category,
+                createdAtMs: Date.now(),
+                source: 'supabase',
+              });
+
+              await localMarkPendingSyncStatus({
+                id: item.id,
+                sync_status: 'success',
+              });
+
+              // Removal on success: simplest durable approach is to leave status=success and filter on load.
+              // For now, mark success only (no delete helper yet).
+            }
+          } else if (payload.operation_type === 'delete') {
+            const delId = payload.deleted_id;
+            await supabase
+              .from('transactions')
+              .delete()
+              .eq('id', delId)
+              .eq('user_id', currentUser.id);
+
+            await localMarkPendingSyncStatus({
+              id: item.id,
+              sync_status: 'success',
+            });
+          }
+        } catch {
+          // Increment retry, preserve row
+          await localMarkPendingSyncStatus({
+            id: item.id,
+            sync_status: 'failed',
+            retry_count: (fresh.retry_count ?? 0) + 1,
+            last_attempt_at: Date.now(),
+          });
+        }
+      }
+    } finally {
+      syncInProgressRef.current = false;
+      syncStartedAtRef.current = null;
+    }
+  }, [currentUser, localLoadPendingSync, localMarkPendingSyncStatus, localUpsertTransaction]);
+
   const addTransaction = useCallback<
+
     TransactionContextValue['addTransaction']
   >(async (transaction) => {
-    
+    const user = currentUser;
 
-
-    // optimistic add for immediate UX
     const clientId = transaction.id ?? crypto.randomUUID();
-    
+    const amount = Number(transaction.amount);
 
-    setTransactions((prev) => [
-      ...prev,
-      {
-        ...transaction,
-        id: clientId,
-        amount: Number(transaction.amount),
-      },
-    ]);
+    if (!Number.isFinite(amount) || amount <= 0) {
+      throw new Error('Invalid transaction amount');
+    }
 
-    // persist to Supabase and reconcile with DB truth
-    try {
-      const user = currentUser;
-      console.log('Current authenticated user:', user);
-      console.log('User ID:', user?.id);
+    if (!user) {
+      // Keep the original behavior: UI-only when unauthenticated.
+      setTransactions((prev) => {
+        if (prev.some((p) => p.id === clientId)) return prev;
+        return [
+          ...prev,
+          {
+            id: clientId,
+            title: transaction.title,
+            amount,
+            type: transaction.type,
+            category: transaction.category,
+          },
+        ];
+      });
+      throw new Error('Not authenticated');
+    }
 
-      if (!user) {
-        console.error('No authenticated user at insert time');
-        // rollback optimistic add
-        console.log('Rolling back optimistic update due to no auth');
-        setTransactions((prev) => prev.filter((p) => p.id !== clientId));
-        throw new Error('Not authenticated');
-      }
+    const localRow = {
+      id: clientId,
+      user_id: user.id,
+      title: transaction.title,
+      description: transaction.title,
+      amount,
+      type: transaction.type,
+      category: transaction.category ?? 'عام',
+      created_at: undefined,
+      source: 'local' as const,
+      createdAtMs: Date.now(),
+    };
 
-      const amount = Number(transaction.amount);
-      console.log('Parsed amount:', amount, 'isFinite:', Number.isFinite(amount));
-      if (!Number.isFinite(amount)) {
-        console.error('Invalid transaction amount:', transaction.amount);
-        setTransactions((prev) => prev.filter((p) => p.id !== clientId));
-        throw new Error('Invalid transaction amount');
-      }
+    // 1) Write transaction locally FIRST
+    await localUpsertTransaction(localRow);
 
-      const payload: {
-        user_id: string;
-        description: string;
-        amount: number;
-        transaction_type: TransactionType;
-        category: string;
-      } = {
-        user_id: user.id,
+    // 2) Enqueue durable pending_create
+    await localEnqueuePendingCreate({
+      user_id: user.id,
+      transaction_id: clientId,
+      payload: {
         description: transaction.title,
         amount,
         transaction_type: transaction.type,
         category: transaction.category ?? 'عام',
-      };
+      },
+    });
 
-      console.log('Final insert payload:', payload);
-      console.log('Supabase client URL:', SUPABASE_URL);
+    // 3) Update React state immediately
+    setTransactions((prev) => {
+      if (prev.some((p) => p.id === clientId)) return prev;
+      return [
+        ...prev,
+        {
+          id: clientId,
+          title: transaction.title,
+          amount,
+          type: transaction.type,
+          category: transaction.category ?? 'عام',
+        },
+      ];
+    });
+  }, [currentUser]);
 
-      console.log('About to send insert request to Supabase');
-      const { data, error } = await supabase
-        .from('transactions')
-        .insert([payload])
-        .select('id,description,amount,transaction_type,category,created_at')
-        .single();
-
-      console.log('Supabase insert response data:', data);
-      console.log('Supabase insert response error:', error);
-
-      if (error) {
-        console.error('Transaction insert failed - exact error:', error);
-        console.error('Payload that failed:', payload);
-        console.error('Auth session state:', { user, session: authCtx?.session });
-        console.log('Rolling back optimistic update due to insert error');
-        setTransactions((prev) => prev.filter((p) => p.id !== clientId));
-        throw error;
-      }
-
-      if (!data) {
-        const fallbackError = new Error('Supabase returned no transaction data');
-        console.error(fallbackError.message, 'Payload:', payload);
-        console.log('Rolling back optimistic update due to no data');
-        setTransactions((prev) => prev.filter((p) => p.id !== clientId));
-        throw fallbackError;
-      }
-
-      console.log('Returned inserted row:', data);
-      const saved = formatSupabaseTransactionRow(data as TransactionRow);
-      console.log('Formatted saved transaction:', saved);
-      setTransactions((prev) => prev.map((p) => (p.id === clientId ? saved : p)));
-    } catch (err) {
-      console.error('addTransaction caught error:', err);
-      throw err;
-    }
-  }, [currentUser, authCtx]);
 
   const deleteTransaction = useCallback<
     TransactionContextValue['deleteTransaction']
   >(async (id) => {
-    setTransactions((prev) =>
-      prev.filter((transaction) => transaction.id !== id)
-    );
-  }, []);
+    const user = currentUser;
+
+    if (user) {
+      // 1) Delete local-first from Dexie
+      await localDeleteTransaction(id, user.id);
+
+      // 2) Enqueue durable remote delete so it can be retried after crashes/offline.
+      // (Best-effort type-safe enqueue helpers are in localPersistence.)
+      // eslint-disable-next-line @typescript-eslint/no-floating-promises
+      import('../lib/localPersistence').then((m) =>
+        m.localEnqueuePendingDelete({
+          user_id: user.id,
+          transaction_id: id,
+          payload: { deleted_id: id },
+        })
+      );
+
+    }
+
+    // 3) Update React state immediately
+    setTransactions((prev) => prev.filter((transaction) => transaction.id !== id));
+  }, [currentUser]);
+
 
   const value = useMemo(
     () =>

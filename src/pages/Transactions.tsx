@@ -18,8 +18,6 @@ import FinModal from '../components/ui/FinModal';
 
 type CategoryFilterValue = 'all' | TransactionCategory;
 
-
-
 const CATEGORY_OPTIONS: Array<{ value: CategoryFilterValue; label: string }> = [
   { value: 'all', label: 'الكل' },
   { value: 'راتب', label: 'راتب' },
@@ -101,8 +99,6 @@ const Transactions: React.FC = () => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
-
-
   useEffect(() => {
     const el = quickInputRef.current;
     if (!el) return;
@@ -112,14 +108,10 @@ const Transactions: React.FC = () => {
     let pending = false;
 
     const applyKeyboardOffset = (keyboardLikelyOpen: boolean) => {
-      // Thresholding: avoid oscillation during multi-step keyboard transitions.
       if (lastKeyboardLikelyOpen === keyboardLikelyOpen) return;
       lastKeyboardLikelyOpen = keyboardLikelyOpen;
 
-      root.style.setProperty(
-        '--cta-keyboard-offset',
-        keyboardLikelyOpen ? '92px' : '0px'
-      );
+      root.style.setProperty('--cta-keyboard-offset', keyboardLikelyOpen ? '92px' : '0px');
     };
 
     const focusIn = () => {
@@ -130,7 +122,6 @@ const Transactions: React.FC = () => {
       const viewportH = vv?.height ?? window.innerHeight;
       const keyboardLikelyOpen = viewportH < window.innerHeight * 0.85;
 
-      // Defer applying to reduce jitter during immediate focus changes.
       queueMicrotask(() => {
         applyKeyboardOffset(keyboardLikelyOpen);
         pending = false;
@@ -143,9 +134,7 @@ const Transactions: React.FC = () => {
       }
     };
 
-
     const focusOut = () => {
-      // Keep calm: only reset when we're sure keyboard is closed.
       const vv = (window as unknown as { visualViewport?: VisualViewport }).visualViewport;
       const viewportH = vv?.height ?? window.innerHeight;
       const keyboardLikelyOpen = viewportH < window.innerHeight * 0.85;
@@ -153,7 +142,6 @@ const Transactions: React.FC = () => {
         document.documentElement.style.setProperty('--cta-keyboard-offset', '0px');
       }
     };
-
 
     el.addEventListener('focus', focusIn);
     el.addEventListener('blur', focusOut);
@@ -168,7 +156,6 @@ const Transactions: React.FC = () => {
   const [typeFilter, setTypeFilter] = useState<'all' | 'income' | 'expense'>('all');
 
   const handleQuickAdd = async () => {
-
     const parsed = parseQuickAdd(quickInput);
     if (!parsed) {
       pushToast({ type: 'error', message: 'جرّب صيغة مثل: 250 طعام' });
@@ -226,7 +213,6 @@ const Transactions: React.FC = () => {
     }
   };
 
-
   const handleConfirmDelete = async () => {
     if (!deleteTarget) return;
     if (isDeleting) return;
@@ -242,7 +228,6 @@ const Transactions: React.FC = () => {
       setIsDeleting(false);
     }
   };
-
 
   const insightTx = useMemo(() => {
     return transactions.map((tx) => ({
@@ -273,13 +258,12 @@ const Transactions: React.FC = () => {
 
   return (
     <div dir="rtl" className="max-w-6xl mx-auto space-y-7 py-8 pb-[calc(3.5rem+env(safe-area-inset-bottom))]">
-      {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
         <div>
           <h1 className="text-4xl font-semibold tracking-tight bg-gradient-to-r from-blue-500 to-emerald-400 bg-clip-text text-transparent">
             المعاملات
           </h1>
-          <p className="mt-2 text-zinc-600/90 dark:text-zinc-200/90 text-sm">
+          <p className="mt-2 text-zinc-800 dark:text-zinc-200/95 text-sm">
             بحث سريع، فلترة ذكية، وإضافات فورية — بأسلوب احترافي.
           </p>
         </div>
@@ -292,14 +276,17 @@ const Transactions: React.FC = () => {
         </div>
       </div>
 
-      {/* Premium AI + Smart Analytics (visual only) */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <Card className="lg:col-span-2 p-5">
           <div className="flex items-start justify-between gap-4">
             <div>
               <div className="text-sm text-zinc-800 dark:text-zinc-100">تحليلات ذكية</div>
-              <div className="text-lg font-semibold mt-1 text-zinc-900 dark:text-stone-200">تصفية ذكية لتشغيل التدفقات</div>
-              <div className="text-sm text-zinc-800 dark:text-zinc-200/90 mt-2">تصنيفات وتحليلات خفيفة لتبدأ بها — بدون تعقيد.</div>
+              <div className="text-lg font-semibold mt-1 text-zinc-900 dark:text-stone-200">
+                تصفية ذكية لتشغيل التدفقات
+              </div>
+              <div className="text-sm text-zinc-800 dark:text-zinc-200/90 mt-2">
+                تصنيفات وتحليلات خفيفة لتبدأ بها — بدون تعقيد.
+              </div>
             </div>
             <div className="rounded-2xl bg-white/[0.92] border border-zinc-300/60 shadow-[0_1px_2px_rgba(0,0,0,0.04)] px-4 py-3">
               <div className="text-xs text-zinc-800 dark:text-zinc-200/90">Analytics</div>
@@ -335,16 +322,20 @@ const Transactions: React.FC = () => {
         </Card>
       </div>
 
-      {/* Filters + Search */}
       <Card className="p-5">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
           <div className="md:col-span-2">
-            <label className="block text-xs text-zinc-600 dark:text-zinc-200/90 mb-2">بحث بالاسم/الفئة</label>
-            <Input value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder="ابحث بالمعنى…" dir="rtl" />
+            <label className="block text-xs text-zinc-800 dark:text-zinc-200/95 mb-2">بحث بالاسم/الفئة</label>
+            <Input
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="ابحث بالمعنى…"
+              dir="rtl"
+            />
           </div>
 
           <div>
-            <label className="block text-xs text-zinc-600 dark:text-zinc-200/90 mb-2">النوع</label>
+            <label className="block text-xs text-zinc-800 dark:text-zinc-200/95 mb-2">النوع</label>
             <select
               aria-label="النوع"
               value={typeFilter}
@@ -361,13 +352,14 @@ const Transactions: React.FC = () => {
 
         <div className="mt-3 flex flex-col md:flex-row md:items-center gap-3">
           <div className="flex-1">
-            <label className="block text-xs text-zinc-600 dark:text-zinc-200/90 mb-2">الفئة</label>
-            <select
-              value={categoryFilter}
-              onChange={(e) => setCategoryFilter(e.target.value as CategoryFilterValue)}
-              className="input"
-              dir="rtl"
-            >
+            <label className="block text-xs text-zinc-800 dark:text-zinc-200/95 mb-2">الفئة</label>
+                <select
+                  aria-label="الفئة"
+                  value={categoryFilter}
+                  onChange={(e) => setCategoryFilter(e.target.value as CategoryFilterValue)}
+                  className="input"
+                  dir="rtl"
+                >
               {CATEGORY_OPTIONS.map((opt) => (
                 <option key={opt.value} value={opt.value}>
                   {opt.label}
@@ -377,7 +369,7 @@ const Transactions: React.FC = () => {
           </div>
 
           <div className="md:flex-0 md:w-auto">
-            <label className="block text-xs text-zinc-600 dark:text-zinc-200/90 mb-2">إجراء</label>
+            <label className="block text-xs text-zinc-800 dark:text-zinc-200/95 mb-2">إجراء</label>
             <Button
               type="button"
               onClick={() => {
@@ -393,11 +385,11 @@ const Transactions: React.FC = () => {
           </div>
 
           <div className="md:flex-0 md:w-auto">
-            <label className="block text-xs text-zinc-600 dark:text-zinc-200/90 mb-2">تصدير</label>
+            <label className="block text-xs text-zinc-800 dark:text-zinc-200/95 mb-2">تصدير</label>
             <Button
               type="button"
               onClick={() => {
-                // UI-only affordance: keep interaction calm; no success toast.
+                // UI-only affordance.
               }}
               variant="secondary"
               className="w-full md:w-48"
@@ -408,20 +400,20 @@ const Transactions: React.FC = () => {
         </div>
       </Card>
 
-      {/* Quick Add */}
       <Card className="relative p-5 overflow-hidden">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_0%,rgba(16,185,129,0.06),transparent_72%),radial-gradient(circle_at_85%_20%,rgba(59,130,246,0.04),transparent_72%)] opacity-70 mix-blend-overlay pointer-events-none" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_0%,rgba(16,185,129,0.06),transparent_72%),radial-gradient(circle_at_85%_20%,rgba(59,130,246,0.04),transparent_72%)] opacity-70 mix-blend-overlay pointer-events-none" />
         <div className="relative flex flex-col lg:flex-row lg:items-end gap-4">
           <div className="flex-1">
             <div className="text-sm text-zinc-700 dark:text-zinc-200/90">إضافة سريعة</div>
             <div className="text-lg font-semibold text-zinc-900 dark:text-[#F8FAFC] mt-1">اكتب مثلاً: 250 طعام أو coffee 25</div>
             <div className="mt-3">
-              <Input
+              <input
+                ref={quickInputRef}
                 value={quickInput}
                 onChange={(e) => setQuickInput(e.target.value)}
                 placeholder="مثال: 250 طعام أو coffee 25"
                 dir="rtl"
-                className="bg-white/[0.92] border border-zinc-300/70 text-zinc-900 placeholder:text-zinc-700 shadow-[0_1px_2px_rgba(0,0,0,0.04)]"
+                className="input mt-2 bg-white dark:bg-zinc-950/80 border border-zinc-400/80 dark:border-white/15 text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-600 dark:placeholder:text-zinc-400 shadow-[0_1px_2px_rgba(0,0,0,0.04)]"
                 onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
                   if (e.key === 'Enter') void handleQuickAdd();
                 }}
@@ -443,16 +435,15 @@ const Transactions: React.FC = () => {
         </div>
       </Card>
 
-      {/* Transaction List */}
       <Card className="p-5 dark:bg-zinc-950/60 border border-white/5 backdrop-blur-xl">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <div className="text-sm text-zinc-400 dark:text-zinc-200/90">قائمة المعاملات</div>
+            <div className="text-sm text-zinc-300 dark:text-zinc-200/95">قائمة المعاملات</div>
             <div className="text-lg font-semibold text-zinc-100 mt-1 tracking-tight">
               {hasAnyTx ? 'عرض سريع ومُرتّب' : 'ابدأ بإضافة معاملات'}
             </div>
           </div>
-          <div className="text-xs text-zinc-300 dark:text-zinc-200/90 tabular-nums">{filteredTransactions.length} نتيجة</div>
+          <div className="text-xs text-zinc-200 dark:text-zinc-200/95 tabular-nums" />
         </div>
 
         {loading ? (
@@ -483,6 +474,7 @@ const Transactions: React.FC = () => {
               {hasAnyTx ? (
                 <div className="mt-7 flex flex-col sm:flex-row gap-3 justify-center">
                   <button
+                    aria-label="إعادة ضبط الفلاتر"
                     onClick={() => {
                       setSearchQuery('');
                       setCategoryFilter('all');
@@ -528,6 +520,7 @@ const Transactions: React.FC = () => {
 
                   <div className="flex items-center justify-between sm:justify-end gap-3">
                     <span className={`text-xs px-3 py-1 rounded-full ${badge.className}`}>{badge.label}</span>
+
                     <div className="text-right">
                       <div
                         className={`font-semibold tracking-tight leading-none whitespace-nowrap tabular-nums ${
@@ -537,10 +530,10 @@ const Transactions: React.FC = () => {
                         {tx.type === 'expense' ? '-' : '+'}
                         {formatAmount(Math.abs(tx.amount))}
                       </div>
-                      <div className="text-xs text-zinc-700 dark:text-zinc-200/90 mt-0.5">معاملة</div>
+                      <div className="text-xs text-zinc-700 dark:text-zinc-100/95 mt-0.5">معاملة</div>
                     </div>
 
-<button
+                    <button
                       onClick={() => {
                         setDeleteTarget({ id: tx.id, title: tx.title });
                         setIsDeleteModalOpen(true);
@@ -551,15 +544,12 @@ const Transactions: React.FC = () => {
                     >
                       حذف
                     </button>
-
                   </div>
                 </div>
               );
             })}
           </div>
         )}
-
-
 
         <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-3">
           <div className="md:col-span-1">
@@ -627,11 +617,9 @@ const Transactions: React.FC = () => {
           >
             المتابعة
           </Button>
-
         </div>
       </FinModal>
 
-      {/* Floating Quick Add Button */}
       <Button
         type="button"
         onClick={() => {
@@ -643,7 +631,6 @@ const Transactions: React.FC = () => {
         + إضافة
       </Button>
     </div>
-
   );
 };
 
