@@ -7,6 +7,7 @@ files:
   - filter:
       - dist/**/*
       - electron/**/*
+      - dist-electron/**/*
 win:
   target: nsis
 electronVersion: 32.3.3

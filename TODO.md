@@ -1,11 +1,63 @@
-# TODO - Targeted cleanup refactor (Transactions.tsx)
+# TODO - Electron hardening + preload safe bridge
 
-- [ ] 0) Inventory current remnants in `src/pages/Transactions.tsx` (toast state, delete UX, mobile CTA spacing, surface gradients, skeleton/empty-state tone, insight recompute boundaries).
-- [ ] 1) Toast unification: remove any local toast remnants (if any) and ensure all calls use `pushToast({type, message, title?})` only.
-- [ ] 2) Calm delete confirmation: add `FinModal` confirmation using emotionally safe wording and calm styling; delete only proceeds on confirm.
-- [ ] 3) Mobile surface harmony: adjust floating CTA position/spacing to honor safe-area + keyboard offset and avoid overlaps.
-- [ ] 4) Surface consistency cleanup: reduce decorative gradients/border drift; align row/card styling with `FinCard` philosophy while preserving calm spacing.
-- [ ] 5) Loading + empty-state discipline: standardize `SkeletonRow` calmness; reduce CTA spam and ensure stable empty-state layout.
-- [ ] 6) Final render discipline: ensure insights recompute only on meaningful transaction changes; avoid introducing dependencies on transient UI state.
-- [ ] 7) Validation: run `npm run build` and `npm run lint -- --max-warnings=0` and verify stable behavior + no RTL regressions.
+## Step 1 — Inspect current Electron wiring (source of truth)
+- [x] Read `electron/main.ts`
+- [x] Read `electron/preload.ts`
+- [x] Read `electron/tsconfig.json`
+- [x] Read `package.json`
+- [x] Read `release/builder-effective-config.yaml` / validate electron-builder coverage
+
+## Step 2 — Implement required changes (approved scope)
+- [x] Update `electron/main.ts` ONLY:
+
+  - [ ] keep security posture:
+    - [ ] contextIsolation: true
+    - [ ] nodeIntegration: false
+    - [ ] sandbox: true
+    - [ ] autoHideMenuBar: true
+  - [ ] add `preload: path.join(__dirname, 'preload.js')`
+  - [ ] add persistent window state
+  - [ ] add safe reload handling
+  - [ ] add crash-safe relaunch behavior
+  - [ ] add production-safe `loadFile` handling
+  - [ ] add offline-safe startup behavior
+  - [ ] add graceful window restore
+  - [ ] add lifecycle protection:
+    - [ ] render-process-gone
+    - [ ] did-fail-load
+    - [ ] unresponsive window handling
+    - [ ] safe app recovery logging
+  - [ ] prevent duplicate Electron windows
+  - [ ] ensure the window is restored instead of creating duplicates
+
+## Step 3 — Implement preload security bridge
+- [ ] Update `electron/preload.ts` ONLY:
+  - [ ] use `contextBridge`.
+  - [ ] expose ONLY:
+    - [ ] app version
+    - [ ] platform
+    - [ ] safe invoke/send wrappers
+  - [ ] do NOT expose Node APIs directly.
+
+## Step 4 — Packaging / electron-builder
+- [ ] Update electron-builder config (via `release/builder-effective-config.yaml` and/or `package.json` if necessary):
+  - [ ] Windows NSIS target
+  - [ ] executable generation
+  - [ ] ensure output goes to `release/`
+  - [ ] ensure built preload/main JS are packaged
+
+## Step 5 — Validation
+- [ ] Run `npm run build`
+- [ ] Run `npm run electron:dev`
+- [ ] Run `npm run electron:build`
+- [ ] Confirm output exists under `release/`
+
+## Step 6 — Summarize
+- [ ] List modified files
+- [ ] Electron architecture notes
+- [ ] Preload bridge/security notes
+- [ ] Packaging behavior notes
+- [ ] Desktop persistence continuity notes
+- [ ] Offline continuity behavior notes
+- [ ] Remaining desktop risks
 
