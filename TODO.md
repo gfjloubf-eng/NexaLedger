@@ -1,16 +1,8 @@
-# TODO — NexaLedger Auth Experience Sprints (Scope-Limited)
+# TODO.md
 
-## Sprint 06 (Executive Clean Composition)
-- [ ] Read current UI composition in `src/pages/Login.tsx` and `src/pages/AuthShell.tsx`.
-- [ ] Remove visual duplication and reduce density:
-  - [ ] Remove repeated/competing surface blocks and excessive decorative elements in AuthShell.
-  - [ ] Consolidate to a single cohesive hierarchy (secure access + inputs + sign-in).
-- [ ] Ensure typography hierarchy uses only tone separation:
-  - [ ] Eliminate opacity-based hierarchy (`/90`, `/95`, `opacity-*`) in Auth/Login text.
-- [ ] Minimize future auth placeholders dominance:
-  - [ ] Reduce size, spacing, and border contrast.
-- [ ] Purify motion to near-invisible:
-  - [ ] Reduce y-translation and spring-like motion.
-  - [ ] Keep only subtle opacity and breathing.
-- [ ] Verify changes compile.
+- [x] Restore and fully rewrite `src/context/TransactionProviderExport.tsx` (remove `>` artifacts, fix hooks/braces, restore provider + add/delete + hook, preserve offline-first + Supabase sync).
+- [x] Run `npm run build` and confirm success.
+- [x] Commit and force-push: `fix: restore clean TransactionProvider production build`.
+- [x] Phase 3 login UX refinement: updated `src/pages/Login.tsx` (visual premium executive polish).
+
 
