@@ -144,17 +144,10 @@ export function TransactionProvider({
     };
   }, [authLoading, currentUser]);
 
-  useEffect(() => {
-    if (!currentUser) return;
-    // Quiet startup drain: non-blocking.
-    queueMicrotask(() => {
-      void drainPendingSync();
-    });
-  }, [currentUser]);
-
   const drainPendingSyncRef = React.useRef(false);
 
   const drainPendingSync = useCallback(async () => {
+    if (!currentUser) return;
     if (!currentUser) return;
     if (drainPendingSyncRef.current) return;
     drainPendingSyncRef.current = true;
