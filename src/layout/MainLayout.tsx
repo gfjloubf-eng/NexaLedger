@@ -4,6 +4,7 @@ import { Outlet } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
 import ThemeToggle from '../components/ThemeToggle';
 import { SettingsProvider } from '../context/SettingsContext';
+import RouteTransitionWrapper from './RouteTransitionWrapper';
 
 const MainLayout: React.FC = () => {
   const [isMobile, setIsMobile] =
@@ -74,7 +75,9 @@ const MainLayout: React.FC = () => {
 
         {/* MAIN CONTENT */}
         <main className="relative z-[1] lg:mr-64 p-6 pt-20 pb-[calc(4.25rem+env(safe-area-inset-bottom))] lg:pb-6">
-          <Outlet />
+          <RouteTransitionWrapper>
+            <Outlet />
+          </RouteTransitionWrapper>
         </main>
 
         {/* MOBILE BOTTOM NAV */}

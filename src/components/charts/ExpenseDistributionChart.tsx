@@ -1,5 +1,16 @@
 import React, { useMemo } from 'react';
-import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip, Legend } from 'recharts';
+import {
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
+  Tooltip,
+  Legend,
+} from 'recharts';
+
+import { ReportChartSurface } from './ReportChartSurface';
+import { getReportTokens } from '../../utils/reportThemeTokens';
+import type { ThemeMode } from '../../context/themeUtils';
 
 export type CategoryTotal = {
   name: string;
@@ -9,16 +20,35 @@ export type CategoryTotal = {
 
 type Props = {
   data: Array<{ name: string; value: number }>;
+  mode?: ThemeMode;
 };
 
-const palette = ['#10B981', '#2563EB', '#F59E0B', '#8B5CF6', '#64748B', '#06B6D4', '#EF4444'];
+// Institutional palette: stable, low-saturation (no neon).
+const palette = [
+  '#22C55E', // emerald
+  '#3B82F6', // blue
+  '#F59E0B', // amber
+  '#8B5CF6', // violet
+  '#64748B', // slate
+  '#06B6D4', // cyan
+  '#EF4444', // red
+];
 
-const ExpenseDistributionChart: React.FC<Props> = ({ data }) => {
+const ExpenseDistributionChart: React.FC<Props> = ({ data, mode }) => {
+  const inferredMode: ThemeMode = (() => {
+    if (mode === 'light' || mode === 'dark') return mode;
+    if (typeof document === 'undefined') return 'light';
+    return document.documentElement.classList.contains('dark') ? 'dark' : 'light';
+  })();
+
+  const t = getReportTokens(inferredMode);
+
   const chartData: CategoryTotal[] = useMemo(() => {
     const safe = data ?? [];
     return safe
       .filter(
-        (d) => d && typeof d.value === 'number' && Number.isFinite(d.value) && d.value > 0
+        (d) =>
+          d && typeof d.value === 'number' && Number.isFinite(d.value) && d.value > 0
       )
       .map((d, idx) => ({
         name: d.name,
@@ -27,53 +57,57 @@ const ExpenseDistributionChart: React.FC<Props> = ({ data }) => {
       }));
   }, [data]);
 
-
-
   return (
-    <div className="relative w-full h-[260px] rounded-3xl bg-[rgba(15,23,42,0.72)] border border-white/6 overflow-hidden">
-      <div aria-hidden className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_10%,rgba(37,99,235,0.03),transparent_60%),radial-gradient(circle_at_80%_70%,rgba(16,185,129,0.02),transparent_60%)] mix-blend-overlay" />
-      <ResponsiveContainer width="100%" height="100%">
-        <PieChart>
-          <Tooltip
-            wrapperStyle={{ direction: 'rtl' }}
-            contentStyle={{ borderRadius: 10, border: '1px solid rgba(255,255,255,0.06)', background: 'rgba(15,23,42,0.9)', color: '#F8FAFC' }}
-            formatter={(value: unknown, name: unknown) => {
-              const n = typeof value === 'number' ? value : Number(value);
-              const label = typeof name === 'string' ? name : '';
-              if (!Number.isFinite(n)) return '—';
-              return [`${n.toLocaleString('ar-SA')}`, `${label}`];
-            }}
-          />
+    <ReportChartSurface mode={inferredMode}>
+      <div style={{ position: 'relative', width: '100%', height: '100%' }}>
+        <ResponsiveContainer width="100%" height="100%">
+          <PieChart>
+            <Tooltip
+              wrapperStyle={{ direction: 'rtl' }}
+              cursor={false}
+              contentStyle={{
+                borderRadius: 12,
+                border: `1px solid ${t.chart.tooltipBorder}`,
+                background: t.chart.tooltipBg,
+                color: t.chart.tooltipText,
+              }}
+              formatter={(value: unknown, name: unknown) => {
+                const n = typeof value === 'number' ? value : Number(value);
+                const label = typeof name === 'string' ? name : '';
+                if (!Number.isFinite(n)) return '—';
+                return [`${n.toLocaleString('ar-SA')}`, `${label}`];
+              }}
+            />
 
-          <Legend
-            align="right"
-            verticalAlign="middle"
-            iconType="circle"
-            formatter={(value) => (typeof value === 'string' ? value : '')}
-            wrapperStyle={{ color: '#94A3B8' }}
-          />
+            <Legend
+              align="right"
+              verticalAlign="middle"
+              iconType="circle"
+              formatter={(value) => (typeof value === 'string' ? value : '')}
+              wrapperStyle={{ color: t.chart.axisText }}
+            />
 
-          <Pie
-            data={chartData}
-            dataKey="value"
-            nameKey="name"
-            cx="40%"
-            cy="50%"
-            outerRadius={95}
-            innerRadius={50}
-            paddingAngle={2}
-            stroke="none"
-          >
-            {chartData.map((entry) => (
-              <Cell key={entry.name} fill={entry.color} />
-            ))}
-          </Pie>
-        </PieChart>
-      </ResponsiveContainer>
-    </div>
+            <Pie
+              data={chartData}
+              dataKey="value"
+              nameKey="name"
+              cx="40%"
+              cy="50%"
+              outerRadius={95}
+              innerRadius={50}
+              paddingAngle={2}
+              stroke="none"
+            >
+              {chartData.map((entry) => (
+                <Cell key={entry.name} fill={entry.color} />
+              ))}
+            </Pie>
+          </PieChart>
+        </ResponsiveContainer>
+      </div>
+    </ReportChartSurface>
   );
 };
 
 export default React.memo(ExpenseDistributionChart);
-
 

@@ -31,8 +31,8 @@ const Sidebar: React.FC = () => {
     <aside className="fixed top-0 right-0 h-full w-64 bg-[rgba(15,23,42,0.78)] border-l border-white/6 text-[#F8FAFC] z-40 backdrop-blur-sm">
 
       <div className="p-6 flex flex-col h-full">
-        <div className="flex items-center gap-3 mb-10 p-3 rounded-xl bg-white/3 ring-1 ring-white/6">
 
+        <div className="flex items-center gap-3 mb-10 p-3 rounded-xl bg-white/[0.02] ring-1 ring-white/8">
           <div className="w-11 h-11 rounded-xl flex items-center justify-center ring-1 ring-white/10 bg-white/[0.02]">
             <svg
               width="42"
@@ -72,10 +72,10 @@ const Sidebar: React.FC = () => {
               key={item.id}
               to={item.path}
               className={({ isActive }) =>
-                `relative w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-colors duration-200 text-right focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/35 focus-visible:ring-offset-0 active:scale-[0.98] ${
+                `relative w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-colors duration-200 text-right focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/35 focus-visible:ring-offset-0 ${
                   isActive
-                    ? 'bg-white/6 text-[#F8FAFC] border-l-4 border-emerald-500/90 shadow-sm'
-                    : 'text-[#94A3B8] hover:bg-white/3'
+                    ? 'bg-white/[0.035] text-[#F8FAFC] ring-1 ring-white/10'
+                    : 'text-[#94A3B8] hover:bg-white/[0.02]'
                 }`
               }
 
@@ -92,7 +92,7 @@ const Sidebar: React.FC = () => {
           <div className="border-t border-white/6 pt-4">
             <button
               onClick={handleSignOut}
-              className="w-full flex items-center justify-end gap-3 px-4 py-2 rounded-xl text-[#94A3B8] hover:bg-white/3 transition-colors duration-150 text-right"
+              className="w-full flex items-center justify-end gap-3 px-4 py-2 rounded-xl text-[#94A3B8] hover:bg-white/[0.02] transition-colors duration-150 text-right"
             >
               <span>تسجيل الخروج</span>
               <span aria-hidden="true">🚪</span>

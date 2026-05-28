@@ -12,7 +12,6 @@ export const motionFast = [
 // Backwards-compatible semantic alias (keeps token vocabulary explicit).
 export const tactilePressSoft = 'active:scale-[0.98]';
 
-
 export const motionNormal = [
   'transition-transform',
   'transition-shadow',
@@ -23,4 +22,13 @@ export const motionNormal = [
 export const hoverLiftSoft = 'hover:-translate-y-0.5';
 
 export const hoverShadowSoft = 'hover:shadow-[0_14px_40px_rgba(0,0,0,0.22)]';
+
+// Shared cinematic motion language (emotionally invisible).
+// Keep motion almost entirely opacity/transform-only.
+export const motionTokenCalm = [
+  'transition-opacity',
+  'duration-200',
+  'ease-out',
+].join(' ');
+
 

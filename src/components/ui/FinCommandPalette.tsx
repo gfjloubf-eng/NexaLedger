@@ -267,7 +267,7 @@ const FinCommandPalette: React.FC = () => {
                           >
                             <div className="flex items-center justify-between gap-3">
                               <div className="flex items-center gap-3">
-                                <div className="h-9 w-9 rounded-2xl bg-white/5 ring-1 ring-white/10 flex items-center justify-center text-sm">
+                                <div className="h-9 w-9 rounded-2xl flex items-center justify-center border border-[rgba(255,255,255,0.08)] bg-[#121A24] text-[#B08968]">
                                   {i.icon}
                                 </div>
                                 <div>

@@ -3,16 +3,18 @@ import React from 'react';
 // Intentionally kept as a component-only file for react-refresh.
 import { useEffect, useMemo, useState } from 'react';
 
-import { applyThemeClass, getInitialMode, syncThemeToSystem, STORAGE_KEY } from './themeUtils';
+import { applyThemeClass, syncThemeToSystem, STORAGE_KEY } from './themeUtils';
 import type { ThemeMode } from './themeProviderTypes';
 import { ThemeContext } from './themeContextOnlyExports';
 
 export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [mode, setModeState] = useState<ThemeMode>(() => getInitialMode());
+  // Operational stability: force LIGHT mode until dark reporting continuity is fully stabilized.
+  const [mode, setModeState] = useState<ThemeMode>(() => 'light');
 
   useEffect(() => {
-    applyThemeClass(mode);
-  }, [mode]);
+    applyThemeClass('light');
+  }, []);
+
 
   useEffect(() => {
     // Keep theme in sync with OS when user hasn't forced a value.
@@ -25,30 +27,36 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     })();
 
     // If saved is 'dark'/'light' => user explicitly forced it; don't override.
+    // Disable dark mode restoration completely.
+    // Even if user previously saved 'dark', ignore it.
     if (initialSaved === 'dark' || initialSaved === 'light') return;
 
-    const stop = syncThemeToSystem((next) => {
-      setModeState(next);
-      applyThemeClass(next);
-    });
+    // syncThemeToSystem currently does not accept an argument in this project build.
+    // For stability we keep LIGHT mode only and do not subscribe to OS theme changes.
+    syncThemeToSystem();
+    const stop = () => {};
+
 
     return stop;
   }, []);
 
-  const setMode = (next: ThemeMode) => {
-    setModeState(next);
+  // Keep API surface compatible with ThemeContext.
+  const setMode = () => {
+    // Disabled: force LIGHT mode only.
+    setModeState('light');
     try {
-      localStorage.setItem(STORAGE_KEY, next);
+      localStorage.setItem(STORAGE_KEY, 'light');
     } catch {
       // ignore
     }
-    applyThemeClass(next);
+    applyThemeClass('light');
   };
+
 
   const value = useMemo(() => {
     const toggle = () => {
-      const next: ThemeMode = mode === 'dark' ? 'light' : 'dark';
-      setMode(next);
+      // Disabled: force LIGHT mode only.
+      setMode('light');
     };
 
     return { mode, toggle, setMode };
