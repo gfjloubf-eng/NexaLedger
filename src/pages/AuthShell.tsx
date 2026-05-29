@@ -32,11 +32,11 @@ const AuthShell: React.FC<AuthShellProps> = ({
         {/* Breathing atmosphere fields (no “one giant dark block”) */}
         <div
           className="absolute inset-0"
-          style={{
+style={{
             background:
-              `radial-gradient(1100px 520px at 12% 12%, ${graphite.c}66 0%, transparent 58%),` +
+              `radial-gradient(1100px 520px at 12% 12%, rgba(122,107,255,0.18) 0%, transparent 58%),` +
               `radial-gradient(950px 480px at 82% 30%, ${graphite.d}55 0%, transparent 60%),` +
-              `radial-gradient(720px 390px at 55% 88%, ${graphite.b}45 0%, transparent 62%)`,
+              `radial-gradient(720px 390px at 55% 88%, rgba(122,107,255,0.16) 0%, transparent 62%)`,
           }}
         />
 
@@ -45,8 +45,8 @@ const AuthShell: React.FC<AuthShellProps> = ({
           className="absolute inset-0"
           style={{
             background:
-              `radial-gradient(720px 420px at 18% 22%, rgba(124,255,178,0.10) 0%, transparent 60%),` +
-              `radial-gradient(620px 380px at 78% 45%, rgba(124,255,178,0.07) 0%, transparent 62%)`,
+              `radial-gradient(720px 420px at 18% 22%, rgba(124,255,178,0.16) 0%, transparent 60%),` +
+              `radial-gradient(620px 380px at 78% 45%, rgba(124,255,178,0.12) 0%, transparent 62%)`,
           }}
         />
 

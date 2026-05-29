@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+ import React, { useMemo, useState } from 'react';
 import { useAuth } from '../context/AuthProvider';
 import { Link, useNavigate } from 'react-router-dom';
 import AuthShell from './AuthShell';
@@ -71,10 +71,10 @@ export default function Login() {
 
   return (
     <AuthShell
-      title="Continue to NexaLedger"
-      subtitle="Your personal financial workspace"
-      rightPanelTitle="Operational Stability"
-      rightPanelSubtitle="Designed to stay steady even when the network is unstable."
+      title="مرحبًا بك في NexaLedger"
+      subtitle="مساحتك المالية لإدارة أعمالك بثقة ووضوح"
+      rightPanelTitle="الاستقرار التشغيلي"
+      rightPanelSubtitle="مصمم ليبقى ثابتًا حتى عند اضطراب الشبكة."
     >
       <form onSubmit={onSubmit} className="space-y-5">
         <AnimatePresence initial={false}>
@@ -108,11 +108,11 @@ export default function Login() {
               <span className="flex items-center justify-center rounded-lg bg-[#10171F] border border-white/6 p-2 transition group-hover:border-[#7CFFB2]/25">
                 <GoogleGlyph />
               </span>
-              <span className="tracking-[0.01em]">Continue with Google</span>
+              <span className="tracking-[0.01em]">تسجيل الدخول باستخدام Google</span>
             </div>
             <div className="mt-2 h-px w-full bg-white/5" aria-hidden="true" />
             <div className="mt-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-[#7F8A98]">
-              Executive provider surface
+              بطاقة موفّر الهوية
             </div>
           </button>
         </div>
@@ -147,7 +147,7 @@ export default function Login() {
               onChange={(e) => setRememberDevice(e.target.checked)}
               className="h-4 w-4 accent-[#7CFFB2]"
             />
-            Remember device
+            تذكّر الجهاز
           </label>
 
           <Link
@@ -155,7 +155,7 @@ export default function Login() {
             to="#"
             onClick={(e) => e.preventDefault()}
           >
-            Forgot password?
+هل نسيت كلمة المرور؟
           </Link>
         </div>
 
@@ -185,16 +185,16 @@ export default function Login() {
           disabled={!canSubmit || submitting}
           className="w-full rounded-xl px-4 py-3"
         >
-          {submitting ? 'Signing in...' : 'Sign in'}
+          {submitting ? 'جارٍ تسجيل الدخول...' : 'تسجيل الدخول'}
         </Button>
 
         <div className="flex items-center justify-between gap-3">
-          <div className="text-sm text-[#7F8A98]">No account yet?</div>
+          <div className="text-sm text-[#7F8A98]">لا تملك حسابًا بعد؟</div>
           <Link
             className="text-sm font-semibold text-[#7CFFB2] transition hover:text-[#9BFFD0]"
             to="/register"
           >
-            Create account
+إنشاء حساب
           </Link>
         </div>
 
@@ -208,10 +208,10 @@ export default function Login() {
             </div>
             <div>
               <div className="text-xs uppercase tracking-[0.12em] text-[#7F8A98]">
-                Operational Stability
+الاستقرار التشغيلي
               </div>
               <div className="mt-1 text-sm font-semibold text-[#F4F7FA]">
-                Designed to stay steady even during network disruptions.
+مصمم ليبقى ثابتًا حتى أثناء اضطراب الاتصال بالشبكة.
               </div>
             </div>
           </div>
@@ -221,13 +221,13 @@ export default function Login() {
           <div className="flex items-center gap-3">
             <div className="h-px flex-1 bg-white/10" />
             <div className="text-xs uppercase tracking-[0.12em] text-[#7F8A98]">
-              Calm options
+خيارات هادئة
             </div>
             <div className="h-px flex-1 bg-white/10" />
           </div>
 
           <div className="mt-4 grid grid-cols-2 gap-3">
-            {["Biometrics", "Fingerprint", "Security Key", "Trusted Device"].map(
+            {["البصمة الحيوية", "البصمة", "مفتاح الأمان", "جهاز موثوق"].map(
               (label) => (
                 <button
                   key={label}
@@ -240,12 +240,11 @@ export default function Login() {
               )
             )}
           </div>
-
-          <div className="mt-3 text-xs text-[#7F8A98] leading-relaxed">
-            {rememberDevice
-              ? 'Device trust enabled — secure continuity active.'
-              : 'Operating locally — sync resumes automatically.'}
-          </div>
+ <div className="mt-3 text-xs text-[#7F8A98] leading-relaxed">
+  {rememberDevice
+    ? 'تم تفعيل الثقة بالجهاز — استمرار آمن.'
+    : 'العمل محليًا — تُستأنف المزامنة تلقائيًا.'}
+</div>
         </div>
       </form>
     </AuthShell>
