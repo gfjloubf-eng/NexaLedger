@@ -33,7 +33,10 @@ export type LocalCategory = {
   updatedAtMs: number;
 };
 
+
+
 export type LocalHydrationMarker = {
+
   user_id: string;
   key: 'hydration_marker';
   // Used to prevent duplicate hydration writes and UI flicker.
@@ -41,11 +44,27 @@ export type LocalHydrationMarker = {
   lastSupabaseSyncAtMs?: number;
 };
 
+export type LocalCustomer = {
+  id: string;
+  user_id: string;
+  name: string;
+  phone: string;
+  email?: string;
+  address?: string;
+  notes?: string;
+  createdAt: number;
+};
+
 class NexaLocalDB extends Dexie {
+
   localTx!: Table<LocalTx, string>;
+
   operationalPrefs!: Table<LocalOperationalPrefs, string>;
   categories!: Table<LocalCategory, string>;
   hydrationMarker!: Table<LocalHydrationMarker, string>;
+
+  customers!: Table<LocalCustomer, string>;
+
   pendingSync!: Table<{
     id: string;
     user_id: string;
@@ -72,10 +91,12 @@ class NexaLocalDB extends Dexie {
       operationalPrefs: '&key, user_id, updatedAtMs',
       categories: 'user_id, category, updatedAtMs',
       hydrationMarker: '&key, user_id, hydratedAtMs',
+      customers: 'id, user_id, createdAt, name, phone',
       pendingSync: 'id, user_id, operation_type, transaction_id, created_at, sync_status, retry_count',
     });
   }
 }
 
 export const localDB = new NexaLocalDB();
+
 

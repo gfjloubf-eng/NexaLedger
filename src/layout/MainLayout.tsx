@@ -135,6 +135,19 @@ const MainLayout: React.FC = () => {
               <span className="text-[11px] text-[#94A3B8]">نبض</span>
             </a>
 
+            {/* Customers */}
+            <a
+              href="#/customers"
+              className="flex flex-col items-center justify-center gap-1 w-full text-center"
+              aria-label="العملاء"
+            >
+              <span className="text-lg leading-none" aria-hidden>
+                🏢
+              </span>
+              <span className="text-[11px] text-[#94A3B8]">العملاء</span>
+            </a>
+
+
             {/* Settings */}
             <a
               href="#/settings"

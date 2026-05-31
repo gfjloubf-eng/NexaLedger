@@ -1,8 +1,9 @@
-# TODO.md
-
-- [x] Restore and fully rewrite `src/context/TransactionProviderExport.tsx` (remove `>` artifacts, fix hooks/braces, restore provider + add/delete + hook, preserve offline-first + Supabase sync).
-- [x] Run `npm run build` and confirm success.
-- [x] Commit and force-push: `fix: restore clean TransactionProvider production build`.
-- [x] Phase 3 login UX refinement: updated `src/pages/Login.tsx` (visual premium executive polish).
-
+- [ ] Rebuild `src/pages/BusinessPulse.tsx` from scratch per spec (no reuse of old derived logic / safeDateFromTx)
+- [ ] Ensure uses only `const { transactions, loading } = useTransactions();`
+- [ ] Status card states computed from transaction count + income vs expense + recent activity
+- [ ] Summary cards computed directly from visible transactions (no today-only calculations)
+- [ ] Observations deterministic from last 7 days trend and totals
+- [ ] Activity trend: last 7 days minimal representation (no charts)
+- [ ] Empty state only when `transactions.length === 0`
+- [ ] Run `npm run build` and confirm pass
 
