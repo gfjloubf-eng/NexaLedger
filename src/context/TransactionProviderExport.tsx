@@ -37,6 +37,7 @@ export function TransactionProvider({
 }: {
   children: React.ReactNode;
 }) {
+
   const [transactions, setTransactions] = useState<ParsedTransaction[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -56,12 +57,13 @@ export function TransactionProvider({
     }
 
     if (!currentUser) {
-      setTransactions([]);
-      setLoading(false);
+      mounted = false;
       return () => {
         mounted = false;
       };
     }
+
+
 
     (async () => {
       // Offline-first hydration to prevent flicker/empty screens.
@@ -72,15 +74,40 @@ export function TransactionProvider({
         const localRows = await localLoadTransactions(currentUser.id);
 
         if (!mounted) return;
-        setTransactions(
-          localRows.map((r) => ({
-            id: r.id,
-            title: (r.title ?? r.description ?? 'معاملات') as string,
-            amount: Number(r.amount),
-            type: r.type,
-            category: (r.category ?? 'عام') as string,
-          }))
-        );
+
+        const localValidCreatedAtMsCount = localRows.filter(
+          (r) => typeof r.createdAtMs === 'number' && Number.isFinite(r.createdAtMs)
+        ).length;
+
+        console.log('[TransactionProviderExport][hydration] localRows.length=', localRows.length);
+        console.log('[TransactionProviderExport][hydration] localValidCreatedAtMsCount=', localValidCreatedAtMsCount);
+
+        const localSample = localRows[0];
+        if (localSample) {
+          console.log('[TransactionProviderExport][hydration] localSample=', {
+            id: localSample.id,
+            createdAtMs: localSample.createdAtMs,
+          });
+        }
+
+        const hydratedLocalTxs: ParsedTransaction[] = localRows.map((r) => ({
+          id: r.id,
+          title: (r.title ?? r.description ?? 'معاملات') as string,
+          amount: Number(r.amount),
+          type: r.type,
+          category: (r.category ?? 'عام') as string,
+          createdAtMs: r.createdAtMs,
+        }));
+
+        console.log('[TransactionProviderExport][hydration] setTransactions(local) -> count=', hydratedLocalTxs.length);
+        const hydratedLocalValidCreatedAtMsCount = hydratedLocalTxs.filter(
+          (t) => typeof t.createdAtMs === 'number' && Number.isFinite(t.createdAtMs)
+        ).length;
+        console.log('[TransactionProviderExport][hydration] setTransactions(local) valid createdAtMs count=', hydratedLocalValidCreatedAtMsCount);
+
+        setTransactions(hydratedLocalTxs);
+
+
 
         // 2) Then attempt Supabase sync (online + auth)
         const { data, error } = await supabase
@@ -98,15 +125,95 @@ export function TransactionProvider({
             formatSupabaseTransactionRow(r)
           );
 
+          const fetchedValidCreatedAtMsCount = fetched.filter(
+            (t) => typeof t.createdAtMs === 'number' && Number.isFinite(t.createdAtMs)
+          ).length;
+
+          console.log('[TransactionProviderExport][merge] fetched.length=', fetched.length);
+          console.log(
+            '[TransactionProviderExport][merge] fetchedValidCreatedAtMsCount=',
+            fetchedValidCreatedAtMsCount
+          );
+
+          const fetchedSample = fetched[0];
+          if (fetchedSample) {
+            console.log('[TransactionProviderExport][merge] fetchedSample=', {
+              id: fetchedSample.id,
+              createdAtMs: fetchedSample.createdAtMs,
+            });
+          }
+
           // Replace local truth with DB truth (but dedupe by id)
           setTransactions((prev) => {
             const existing = new Set(prev.map((p) => p.id));
+            const prevById = new Map(prev.map((p) => [p.id, p] as const));
+
+            console.log('[TransactionProviderExport][merge] prev.count=', prev.length);
+            const prevValidCreatedAtMsCount = prev.filter(
+              (p) => typeof p.createdAtMs === 'number' && Number.isFinite(p.createdAtMs)
+            ).length;
+            console.log(
+              '[TransactionProviderExport][merge] prevValidCreatedAtMsCount=',
+              prevValidCreatedAtMsCount
+            );
+
+            // Preserve existing timestamp data if available, otherwise derive from Supabase.
             const merged = [
-              ...fetched.filter((f) => !existing.has(f.id)),
-              ...prev.filter((p) => existing.has(p.id)),
+              ...fetched.map((f) => {
+                const p = prevById.get(f.id);
+                if (!p) return f;
+                return {
+                  ...f,
+                  // Preserve local timestamp if present, otherwise use Supabase-derived value.
+                  createdAtMs:
+                    typeof p.createdAtMs === 'number'
+                      ? p.createdAtMs
+                      : f.createdAtMs,
+                };
+              }),
+              // Preserve any local-only transactions.
+              ...prev.filter((p) => !existing.has(p.id)),
             ];
-            return merged;
+
+            const mergedValidCreatedAtMsCount = merged.filter(
+              (t) => typeof t.createdAtMs === 'number' && Number.isFinite(t.createdAtMs)
+            ).length;
+            console.log(
+              '[TransactionProviderExport][merge] merged.count=',
+              merged.length
+            );
+            console.log(
+              '[TransactionProviderExport][merge] mergedValidCreatedAtMsCount=',
+              mergedValidCreatedAtMsCount
+            );
+
+            // Ensure no duplicates and keep the newest superset order.
+            const dedup = new Map<string, ParsedTransaction>();
+            for (const t of merged) {
+              dedup.set(t.id, t);
+            }
+            const out = Array.from(dedup.values());
+            const outValidCreatedAtMsCount = out.filter(
+              (t) => typeof t.createdAtMs === 'number' && Number.isFinite(t.createdAtMs)
+            ).length;
+            console.log('[TransactionProviderExport][merge] setTransactions(supabase merged) -> out.count=', out.length);
+            console.log('[TransactionProviderExport][merge] setTransactions(supabase merged) valid createdAtMs count=', outValidCreatedAtMsCount);
+
+            // Sample tracking
+            const outSample = out[0];
+            if (outSample) {
+              const p = prevById.get(outSample.id);
+              console.log('[TransactionProviderExport][merge] outSample=', {
+                id: outSample.id,
+                createdAtMs: outSample.createdAtMs,
+                prevCreatedAtMs: p?.createdAtMs,
+              });
+            }
+
+            return out;
           });
+
+
         } else if (error) {
           console.error('Failed to load transactions', error);
         }
@@ -173,7 +280,7 @@ export function TransactionProvider({
     setTransactions((prev) => {
       if (prev.some((p) => p.id === clientId)) return prev;
 
-      return [
+return [
         ...prev,
         {
           id: clientId,
@@ -181,8 +288,10 @@ export function TransactionProvider({
           amount,
           type: transaction.type,
           category: transaction.category ?? 'عام',
+          createdAtMs: Date.now(),
         },
       ];
+
     });
   }, [currentUser]);
 

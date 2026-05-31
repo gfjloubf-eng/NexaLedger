@@ -36,14 +36,27 @@ export function formatSupabaseTransactionRow(
   const title = (row.title ?? row.description ?? '') as string;
   const txType = (row.type ?? row.transaction_type) as TransactionType;
 
+  // Backward compatible: created_at may exist as ISO string.
+  // Derive createdAtMs when available.
+  let createdAtMs: number | undefined;
+  if (typeof row.created_at === 'string' && row.created_at) {
+    const d = new Date(row.created_at);
+    if (!Number.isNaN(d.getTime())) {
+      createdAtMs = d.getTime();
+    }
+  }
+
   return {
     id: row.id,
     title: title || 'المعاملة',
     amount: coerceTransactionAmount(row.amount),
     type: txType,
     category: defaultTransactionCategory(row.category),
+    createdAtMs,
   };
 }
+
+
 
 
 export function isValidQuickAddInput(input: QuickAddInput): boolean {

@@ -123,6 +123,18 @@ const MainLayout: React.FC = () => {
               <span className="text-[11px] text-[#94A3B8]">تقارير</span>
             </a>
 
+            {/* Business Pulse */}
+            <a
+              href="#/business-pulse"
+              className="flex flex-col items-center justify-center gap-1 w-full text-center"
+              aria-label="نبض الأعمال"
+            >
+              <span className="text-lg leading-none" aria-hidden>
+                ⬈
+              </span>
+              <span className="text-[11px] text-[#94A3B8]">نبض</span>
+            </a>
+
             {/* Settings */}
             <a
               href="#/settings"
@@ -134,6 +146,7 @@ const MainLayout: React.FC = () => {
               </span>
               <span className="text-[11px] text-[#94A3B8]">إعدادات</span>
             </a>
+
           </div>
         </nav>
 

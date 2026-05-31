@@ -17,6 +17,9 @@ export type ParsedTransaction = {
   amount: number;
   type: TransactionType;
   category: TransactionCategory;
+  createdAtMs?: number;
 };
+
+
 
 

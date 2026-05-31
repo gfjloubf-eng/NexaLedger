@@ -5,7 +5,9 @@ import MainLayout from './layout/MainLayout';
 import Dashboard from './pages/Dashboard';
 import Transactions from './pages/Transactions';
 import Reports from './pages/Reports';
+import BusinessPulse from './pages/BusinessPulse';
 import Wallets from './pages/Wallets';
+
 import Goals from './pages/Goals';
 import AI from './pages/AI';
 import Settings from './pages/Settings';
@@ -23,8 +25,10 @@ const App: React.FC = () => {
           <Route path="/" element={<Dashboard />} />
           <Route path="/transactions" element={<Transactions />} />
           <Route path="/reports" element={<Reports />} />
+          <Route path="/business-pulse" element={<BusinessPulse />} />
 
           {/* Foundation modules (UI placeholders only) */}
+
           <Route path="/wallets" element={<Wallets />} />
           <Route path="/goals" element={<Goals />} />
           <Route path="/ai" element={<AI />} />
