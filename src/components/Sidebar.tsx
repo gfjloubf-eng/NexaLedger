@@ -16,6 +16,7 @@ const Sidebar: React.FC = () => {
     { id: 'dashboard', path: '/', label: 'لوحة التحكم', icon: '🏠' },
     { id: 'transactions', path: '/transactions', label: 'المعاملات', icon: '💳' },
     { id: 'customers', path: '/customers', label: 'العملاء', icon: '🏢' },
+    { id: 'invoices', path: '/invoices', label: 'الفواتير', icon: '🧾' },
     { id: 'business-pulse', path: '/business-pulse', label: 'نبض الأعمال', icon: '📈' },
     { id: 'reports', path: '/reports', label: 'التقارير', icon: '📊' },
     { id: 'settings', path: '/settings', label: 'الإعدادات', icon: '⚙️' },

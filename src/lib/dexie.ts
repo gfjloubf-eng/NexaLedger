@@ -65,7 +65,15 @@ class NexaLocalDB extends Dexie {
 
   customers!: Table<LocalCustomer, string>;
 
+  invoices!: Table<
+    import('../types/invoice').Invoice & {
+      user_id: string;
+    },
+    string
+  >;
+
   pendingSync!: Table<{
+
     id: string;
     user_id: string;
     operation_type: 'create' | 'delete';
@@ -92,6 +100,7 @@ class NexaLocalDB extends Dexie {
       categories: 'user_id, category, updatedAtMs',
       hydrationMarker: '&key, user_id, hydratedAtMs',
       customers: 'id, user_id, createdAt, name, phone',
+      invoices: 'id, user_id, customerId, invoiceNumber, createdAt, dueDate, status',
       pendingSync: 'id, user_id, operation_type, transaction_id, created_at, sync_status, retry_count',
     });
   }

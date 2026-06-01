@@ -8,6 +8,7 @@ import Reports from './pages/Reports';
 import BusinessPulse from './pages/BusinessPulse';
 import Wallets from './pages/Wallets';
 import Customers from './pages/Customers';
+import Invoices from './pages/Invoices';
 
 import Goals from './pages/Goals';
 import AI from './pages/AI';
@@ -28,8 +29,10 @@ const App: React.FC = () => {
           <Route path="/reports" element={<Reports />} />
           <Route path="/business-pulse" element={<BusinessPulse />} />
           <Route path="/customers" element={<Customers />} />
+          <Route path="/invoices" element={<Invoices />} />
 
           {/* Foundation modules (UI placeholders only) */}
+
 
           <Route path="/wallets" element={<Wallets />} />
           <Route path="/goals" element={<Goals />} />
