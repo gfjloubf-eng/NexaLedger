@@ -1,12 +1,10 @@
-# TODO - Mobile Nav Drawer rebuild
+# TODO - Drawer text visibility hotfix
 
-- [ ] Read current MobileNavDrawer and MainLayout (done)
-- [ ] Replace src/layout/MobileNavDrawer.tsx with fresh, React-controlled Framer Motion drawer UI (no DOM events, no extra listeners beyond ESC/outside click, RTL-first, route-change close via useLocation)
-- [x] Update MainLayout to own drawer state and pass props to MobileNavDrawer (remove document event dispatch)
-
-- [x] Ensure MobileNavTree is rendered inside drawer only
-
-- [ ] Run `npm run build` and fix any TS/ESLint issues
-- [ ] Confirm requirements: mobile-only, open via ☰, close on outside/ESC/route change, RTL opens from right
-- [ ] Final report + confirmation string
+- [ ] Inspect MobileNavDrawer and MobileNavTree for drawer label color/opacity classes.
+- [ ] Update MobileNavTree label styles to high-contrast typography:
+  - text-slate-900 dark:text-white font-semibold (and active: text-emerald-600 dark:text-emerald-400 font-bold)
+  - remove any muted/faded classes (text-slate-400/500/zinc-400, opacity, text-white/60..80, etc.)
+- [ ] Update MobileNavDrawer header/close-button text to match high-contrast requirements.
+- [ ] Build: `npm run build`.
+- [ ] Confirm result message: “Drawer text visibility fixed successfully”.
 

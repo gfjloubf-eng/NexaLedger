@@ -34,7 +34,7 @@ const TreeButton: React.FC<{
       }
 
     >
-      <span className="text-sm font-semibold text-[#F8FAFC]">{label}</span>
+      <span className="text-sm font-semibold text-slate-900 dark:text-white">{label}</span>
       <span
         aria-hidden="true"
         className={
@@ -65,7 +65,7 @@ const NavRow: React.FC<{ item: NavItem; depth?: number }> = ({ item, depth = 0 }
           {item.icon}
         </span>
       ) : null}
-      <span className="text-[#F8FAFC]">{item.label}</span>
+      <span className="text-slate-900 dark:text-white font-semibold">{item.label}</span>
     </NavLink>
   );
 };

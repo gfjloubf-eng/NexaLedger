@@ -67,12 +67,15 @@ export default function MobileNavDrawer({
           >
             <div className="h-full p-4">
               <div className="flex items-center justify-between mb-3">
-                <div className="text-sm font-semibold text-[#F8FAFC]">التنقل</div>
+                <div className="text-sm font-semibold text-slate-100">التنقل</div>
+
+
 
                 <button
                   type="button"
                   onClick={close}
-                  className="h-9 w-9 rounded-xl bg-white/[0.06] ring-1 ring-white/10 text-[#F8FAFC] hover:bg-white/[0.09] transition"
+                  className="h-9 w-9 rounded-xl bg-white/[0.06] ring-1 ring-white/10 text-slate-100 hover:text-white hover:bg-white/[0.09] transition"
+
                   aria-label="Close navigation"
                 >
                   ✕
