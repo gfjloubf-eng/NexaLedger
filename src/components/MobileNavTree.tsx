@@ -32,7 +32,6 @@ const TreeButton: React.FC<{
         'w-full flex items-center justify-between gap-3 px-4 py-3 rounded-2xl transition-colors ' +
         'hover:bg-white/[0.03] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/35'
       }
-
     >
       <span className="text-sm font-semibold text-slate-900 dark:text-white">{label}</span>
       <span
@@ -48,27 +47,7 @@ const TreeButton: React.FC<{
   );
 };
 
-const NavRow: React.FC<{ item: NavItem; depth?: number }> = ({ item, depth = 0 }) => {
-  return (
-    <NavLink
-      to={item.path}
-      end
-      className={({ isActive }) =>
-        `flex items-center gap-3 rounded-2xl px-5 py-2 transition-colors duration-150 text-sm ` +
-        `focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/35 ` +
-        `${isActive ? 'bg-white/[0.05] ring-1 ring-white/10' : 'hover:bg-white/[0.02]'}`
-      }
-      style={{ paddingRight: depth ? 24 : undefined }}
-    >
-      {item.icon ? (
-        <span className="w-7 h-7 rounded-xl flex items-center justify-center bg-white/[0.02] ring-1 ring-white/10">
-          {item.icon}
-        </span>
-      ) : null}
-      <span className="text-slate-900 dark:text-white font-semibold">{item.label}</span>
-    </NavLink>
-  );
-};
+
 
 export default function MobileNavTree({
   defaultExpandedSection,
@@ -110,7 +89,6 @@ export default function MobileNavTree({
   const findSectionIdForPath = (pathname: string) => {
     for (const section of sections) {
       if (section.items.some((i) => i.path === pathname)) return section.id;
-      // handle nested paths if any (future-proof)
       if (section.items.some((i) => pathname.startsWith(i.path + '/'))) return section.id;
     }
     return null;
@@ -125,7 +103,6 @@ export default function MobileNavTree({
     return m;
   });
 
-  // Derived for default “active section open” behavior.
   // Keep lint-safe.
   void useMemo(() => {
     const m: Record<string, boolean> = { ...expanded };
@@ -134,7 +111,7 @@ export default function MobileNavTree({
   }, [expanded, derivedDefaultExpanded]);
 
   return (
-    <div dir="rtl" className="space-y-3" onClickCapture={() => onNavigate?.()}>
+    <div dir="rtl" className="space-y-3">
       {sections.map((section) => {
         const isOpen = !!expanded[section.id];
         return (
@@ -160,7 +137,25 @@ export default function MobileNavTree({
                   <div className="px-2 pb-3">
                     <div className="space-y-2">
                       {section.items.map((item) => (
-                        <NavRow key={item.id} item={item} depth={1} />
+                        <NavLink
+                          key={item.id}
+                          to={item.path}
+                          end
+                          onClick={() => onNavigate?.()}
+                          className={({ isActive }) =>
+                            `flex items-center gap-3 rounded-2xl px-5 py-2 transition-colors duration-150 text-sm ` +
+                            `focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/35 ` +
+                            `${isActive ? 'bg-white/[0.05] ring-1 ring-white/10' : 'hover:bg-white/[0.02]'}`
+                          }
+                          style={{ paddingRight: 24 }}
+                        >
+                          {item.icon ? (
+                            <span className="w-7 h-7 rounded-xl flex items-center justify-center bg-white/[0.02] ring-1 ring-white/10">
+                              {item.icon}
+                            </span>
+                          ) : null}
+                          <span className="text-slate-900 dark:text-white font-semibold">{item.label}</span>
+                        </NavLink>
                       ))}
                     </div>
                   </div>
