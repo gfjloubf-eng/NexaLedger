@@ -1,9 +1,12 @@
-- [ ] Rebuild `src/pages/BusinessPulse.tsx` from scratch per spec (no reuse of old derived logic / safeDateFromTx)
-- [ ] Ensure uses only `const { transactions, loading } = useTransactions();`
-- [ ] Status card states computed from transaction count + income vs expense + recent activity
-- [ ] Summary cards computed directly from visible transactions (no today-only calculations)
-- [ ] Observations deterministic from last 7 days trend and totals
-- [ ] Activity trend: last 7 days minimal representation (no charts)
-- [ ] Empty state only when `transactions.length === 0`
-- [ ] Run `npm run build` and confirm pass
+# TODO - Mobile Nav Drawer rebuild
+
+- [ ] Read current MobileNavDrawer and MainLayout (done)
+- [ ] Replace src/layout/MobileNavDrawer.tsx with fresh, React-controlled Framer Motion drawer UI (no DOM events, no extra listeners beyond ESC/outside click, RTL-first, route-change close via useLocation)
+- [x] Update MainLayout to own drawer state and pass props to MobileNavDrawer (remove document event dispatch)
+
+- [x] Ensure MobileNavTree is rendered inside drawer only
+
+- [ ] Run `npm run build` and fix any TS/ESLint issues
+- [ ] Confirm requirements: mobile-only, open via ☰, close on outside/ESC/route change, RTL opens from right
+- [ ] Final report + confirmation string
 

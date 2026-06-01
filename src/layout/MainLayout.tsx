@@ -6,9 +6,11 @@ import ThemeToggle from '../components/ThemeToggle';
 import { SettingsProvider } from '../context/SettingsContext';
 import RouteTransitionWrapper from './RouteTransitionWrapper';
 
+import MobileNavDrawer from './MobileNavDrawer';
+
 const MainLayout: React.FC = () => {
-  const [isMobile, setIsMobile] =
-    useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+  const [drawerOpen, setDrawerOpen] = useState(false);
 
   useEffect(() => {
     const checkMobile = () => {
@@ -80,88 +82,36 @@ const MainLayout: React.FC = () => {
           </RouteTransitionWrapper>
         </main>
 
-        {/* MOBILE BOTTOM NAV */}
-        <nav
-          dir="rtl"
-          className="fixed bottom-0 right-0 left-0 z-50 lg:hidden border-t border-white/6 bg-[rgba(15,23,42,0.78)] backdrop-blur-xl"
-          aria-label="Bottom Navigation"
-        >
-          <div className="flex items-center justify-around px-2 pt-2 pb-[calc(env(safe-area-inset-bottom)+0.45rem)]">
-            {/* Dashboard */}
-            <a
-              href="#/"
-              className="flex flex-col items-center justify-center gap-1 w-full text-center"
-              aria-label="لوحة التحكم"
+        {/* MOBILE NAV: ☰ + RIGHT DRAWER */}
+        {isMobile && (
+          <>
+            <button
+              type="button"
+              aria-label="Open navigation"
+              onClick={() => {
+                setDrawerOpen(true);
+              }}
+
+              className="lg:hidden fixed top-[calc(1rem+env(safe-area-inset-top))] right-4 z-50 h-10 w-10 rounded-xl bg-white/[0.06] ring-1 ring-white/10 backdrop-blur-sm text-[#F8FAFC]"
+              style={{ display: 'grid', placeItems: 'center' }}
             >
-              <span className="text-lg leading-none" aria-hidden>
-                🏠
-              </span>
-              <span className="text-[11px] text-[#94A3B8]">لوحة</span>
-            </a>
+              <span aria-hidden="true" className="text-xl">☰</span>
+            </button>
 
-            {/* Transactions */}
-            <a
-              href="#/transactions"
-              className="flex flex-col items-center justify-center gap-1 w-full text-center"
-              aria-label="المعاملات"
-            >
-              <span className="text-lg leading-none" aria-hidden>
-                💳
-              </span>
-              <span className="text-[11px] text-[#94A3B8]">معاملات</span>
-            </a>
+            <div
+              id="nexa-mobile-drawer-open"
+              className="lg:hidden"
+              style={{ display: 'contents' }}
+            />
 
-            {/* Reports */}
-            <a
-              href="#/reports"
-              className="flex flex-col items-center justify-center gap-1 w-full text-center"
-              aria-label="التقارير"
-            >
-              <span className="text-lg leading-none" aria-hidden>
-                📊
-              </span>
-              <span className="text-[11px] text-[#94A3B8]">تقارير</span>
-            </a>
+            <MobileNavDrawer
+              open={drawerOpen}
+              onOpenChange={setDrawerOpen}
+            />
 
-            {/* Business Pulse */}
-            <a
-              href="#/business-pulse"
-              className="flex flex-col items-center justify-center gap-1 w-full text-center"
-              aria-label="نبض الأعمال"
-            >
-              <span className="text-lg leading-none" aria-hidden>
-                ⬈
-              </span>
-              <span className="text-[11px] text-[#94A3B8]">نبض</span>
-            </a>
+          </>
+        )}
 
-            {/* Customers */}
-            <a
-              href="#/customers"
-              className="flex flex-col items-center justify-center gap-1 w-full text-center"
-              aria-label="العملاء"
-            >
-              <span className="text-lg leading-none" aria-hidden>
-                🏢
-              </span>
-              <span className="text-[11px] text-[#94A3B8]">العملاء</span>
-            </a>
-
-
-            {/* Settings */}
-            <a
-              href="#/settings"
-              className="flex flex-col items-center justify-center gap-1 w-full text-center"
-              aria-label="الإعدادات"
-            >
-              <span className="text-lg leading-none" aria-hidden>
-                ⚙️
-              </span>
-              <span className="text-[11px] text-[#94A3B8]">إعدادات</span>
-            </a>
-
-          </div>
-        </nav>
 
       </div>
     </SettingsProvider>
