@@ -1,6 +1,6 @@
 # Cloude Code ToolBox — MCP & Skills awareness
 
-_Generated: 2026-06-01T14:58:39.820Z_
+_Generated: 2026-06-02T10:13:02.331Z_
 
 ## How to use this report
 

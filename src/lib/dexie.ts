@@ -72,6 +72,13 @@ class NexaLocalDB extends Dexie {
     string
   >;
 
+  payments!: Table<
+    import('../types/payment').Payment & {
+      user_id: string;
+    },
+    string
+  >;
+
   pendingSync!: Table<{
 
     id: string;
@@ -102,6 +109,7 @@ class NexaLocalDB extends Dexie {
       customers: 'id, user_id, createdAt, name, phone',
       invoices: 'id, user_id, customerId, invoiceNumber, createdAt, dueDate, status',
       pendingSync: 'id, user_id, operation_type, transaction_id, created_at, sync_status, retry_count',
+      payments: 'id, user_id, customerId, invoiceId, createdAt, method',
     });
   }
 }
