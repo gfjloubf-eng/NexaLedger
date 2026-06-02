@@ -19,6 +19,8 @@ import Settings from './pages/Settings';
 import Login from './pages/Login';
 import Signup from './pages/Register';
 import ProtectedRoute from './context/ProtectedRoute';
+import Statements from './pages/Statements';
+
 
 const App: React.FC = () => {
   return (
@@ -35,12 +37,12 @@ const App: React.FC = () => {
           <Route path="/invoices" element={<Invoices />} />
           <Route path="/payments" element={<Payments />} />
 
-
+          <Route path="/statements" element={<Statements />} />
 
           {/* Foundation modules (UI placeholders only) */}
 
-
           <Route path="/wallets" element={<Wallets />} />
+
           <Route path="/goals" element={<Goals />} />
           <Route path="/ai" element={<AI />} />
           <Route path="/settings" element={<Settings />} />

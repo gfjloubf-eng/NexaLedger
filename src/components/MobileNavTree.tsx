@@ -67,6 +67,7 @@ export default function MobileNavTree({
           { id: 'customers-root', label: 'العملاء', path: '/customers', icon: '🏢' },
           { id: 'invoices', label: 'الفواتير', path: '/invoices', icon: '🧾' },
           { id: 'payments', label: 'المدفوعات', path: '/payments', icon: '💳' },
+          { id: 'transactions', label: 'المعاملات', path: '/transactions', icon: '💰' },
         ],
       },
       {

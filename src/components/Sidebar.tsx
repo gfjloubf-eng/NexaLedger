@@ -14,7 +14,8 @@ const Sidebar: React.FC = () => {
 
   const sidebarItems: SidebarItem[] = [
     { id: 'dashboard', path: '/', label: 'لوحة التحكم', icon: '🏠' },
-    { id: 'transactions', path: '/transactions', label: 'المعاملات', icon: '💳' },
+    { id: 'transactions', path: '/transactions', label: 'المعاملات', icon: '💰' },
+
     { id: 'customers', path: '/customers', label: 'العملاء', icon: '🏢' },
     { id: 'invoices', path: '/invoices', label: 'الفواتير', icon: '🧾' },
     { id: 'payments', path: '/payments', label: 'المدفوعات', icon: '💳' },
