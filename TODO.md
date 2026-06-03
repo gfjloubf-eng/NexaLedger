@@ -1,10 +1,11 @@
-# TODO - Drawer text visibility hotfix
+# TODO — Executive Dashboard V1
 
-- [ ] Inspect MobileNavDrawer and MobileNavTree for drawer label color/opacity classes.
-- [ ] Update MobileNavTree label styles to high-contrast typography:
-  - text-slate-900 dark:text-white font-semibold (and active: text-emerald-600 dark:text-emerald-400 font-bold)
-  - remove any muted/faded classes (text-slate-400/500/zinc-400, opacity, text-white/60..80, etc.)
-- [ ] Update MobileNavDrawer header/close-button text to match high-contrast requirements.
-- [ ] Build: `npm run build`.
-- [ ] Confirm result message: “Drawer text visibility fixed successfully”.
+- [ ] Inspect existing data types + persistence helpers for Customers, Invoices, Payments.
+- [ ] Implement Executive Command Center layout in `src/pages/Dashboard.tsx` (badge/title/subtitle).
+- [ ] Implement executive KPI cards (customers count, invoices total, payments total, outstanding balance).
+- [ ] Implement Top Customers list (name + outstanding balance, sorted desc).
+- [ ] Implement Latest Activity unified timeline (customer/invoice/payment created, newest first).
+- [ ] Implement Financial Health section (total revenue, total payments, outstanding balance) using same formulas.
+- [ ] Ensure RTL + mobile-first premium spacing/contrast.
+- [ ] Run `npm run build` and fix TypeScript issues until success.
 
