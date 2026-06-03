@@ -1,6 +1,6 @@
 # Cloude Code ToolBox — MCP & Skills awareness
 
-_Generated: 2026-06-03T17:43:35.164Z_
+_Generated: 2026-06-03T18:49:35.293Z_
 
 ## How to use this report
 
@@ -34,7 +34,7 @@ _None found (or no workspace open)._
 ### User-scoped
 
 - **microsoft-foundry** — `C:\Users\pc\.agents\skills\microsoft-foundry`
-  - Deploy, evaluate, fine-tune, and manage Foundry agents end-to-end: Docker build, ACR push, hosted/prompt agent create, container start, batch eval, continuous eval, prompt optimizer, Agent Optimizer scaffold, agent.yaml,
+  - Deploy, evaluate, fine-tune, and manage Foundry agents end-to-end: Docker build, ACR push, hosted/prompt agent create, batch eval, continuous eval, prompt optimizer, Agent Optimizer scaffold, agent.yaml, dataset curation
 
 ---
 
