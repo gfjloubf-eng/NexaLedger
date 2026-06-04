@@ -11,8 +11,6 @@ import Customers from './pages/Customers';
 import Invoices from './pages/Invoices';
 import Payments from './pages/Payments';
 
-
-
 import Goals from './pages/Goals';
 import AI from './pages/AI';
 import Settings from './pages/Settings';
@@ -20,6 +18,9 @@ import Login from './pages/Login';
 import Signup from './pages/Register';
 import ProtectedRoute from './context/ProtectedRoute';
 import Statements from './pages/Statements';
+import DecisionCenter from './pages/DecisionCenter';
+
+
 
 
 const App: React.FC = () => {
@@ -46,11 +47,14 @@ const App: React.FC = () => {
           <Route path="/goals" element={<Goals />} />
           <Route path="/ai" element={<AI />} />
           <Route path="/settings" element={<Settings />} />
+          <Route path="/decision-center" element={<DecisionCenter />} />
+
         </Route>
       </Route>
     </Routes>
   );
 };
+
 
 export default App;
 
