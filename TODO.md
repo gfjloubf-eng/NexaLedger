@@ -1,23 +1,24 @@
-# TODO — Financial Reports V1
+# TODO
 
-## Step 1
-Replace `src/pages/Reports.tsx` with Financial Reports V1 implementation.
+## Task: NEXALEDGER — FORECAST V2.6 EXTREME CONTRAST PASS
 
-## Step 2
-Implement report sections:
-- Revenue Report
-- Payments Report
-- Outstanding Balances Report
-- Top Customers Report
-- Monthly Summary
-- Yearly Summary
+- [ ] Implement extreme-contrast styling changes ONLY in `src/pages/CashFlowForecast.tsx`:
+  - Replace primary/secondary text classes to match:
+    - primary: `text-slate-50`, `font-semibold`
+    - secondary: `text-slate-300` (no faded gray)
+  - Upgrade executive numbers to:
+    - `text-slate-50`, `font-extrabold`, `tracking-tight`
+  - Increase card separation/visibility:
+    - add `border-white/15`, stronger shadows/depth/layering
+  - Upgrade insight cards dominance:
+    - labels `text-xs` + `text-slate-300`
+    - values `text-3xl` + `font-extrabold` + `text-slate-50`
+  - Upgrade notification center:
+    - brighter titles/messages, stronger pills, stronger left border & glow
+  - Aggressively upgrade chart visibility:
+    - brighter labels/legend, tooltip contrast, stronger grid visibility
+  - Ensure all changes preserve existing logic/components.
 
-## Step 3
-Implement Executive Insights block.
-
-## Step 4
-Ensure RTL + mobile-first + executive SaaS spacing + premium empty states.
-
-## Step 5
-Run `npm run build` and fix TypeScript issues until it compiles.
-
+- [ ] Show actual JSX snippets changed.
+- [ ] Run `npm run build`.
+- [ ] Return final build output.

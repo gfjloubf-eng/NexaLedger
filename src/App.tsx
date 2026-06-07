@@ -19,6 +19,8 @@ import Signup from './pages/Register';
 import ProtectedRoute from './context/ProtectedRoute';
 import Statements from './pages/Statements';
 import DecisionCenter from './pages/DecisionCenter';
+import CashFlowForecast from './pages/CashFlowForecast';
+
 
 
 
@@ -48,6 +50,9 @@ const App: React.FC = () => {
           <Route path="/ai" element={<AI />} />
           <Route path="/settings" element={<Settings />} />
           <Route path="/decision-center" element={<DecisionCenter />} />
+          <Route path="/cash-flow-forecast" element={<CashFlowForecast />} />
+
+
 
         </Route>
       </Route>

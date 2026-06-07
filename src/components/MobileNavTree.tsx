@@ -76,9 +76,11 @@ export default function MobileNavTree({
         items: [
           { id: 'business-pulse', label: 'نبض الأعمال', path: '/business-pulse', icon: '📈' },
           { id: 'reports', label: 'التقارير', path: '/reports', icon: '📊' },
+          { id: 'cash-flow-forecast', label: '🔮 التوقعات المالية', path: '/cash-flow-forecast', icon: '🔮' },
           { id: 'decision-center', label: 'مركز القرار', path: '/decision-center', icon: '🧠' },
         ],
       },
+
       {
         id: 'system',
         label: 'النظام',

@@ -22,7 +22,9 @@ const Sidebar: React.FC = () => {
     { id: 'business-pulse', path: '/business-pulse', label: 'نبض الأعمال', icon: '📈' },
     { id: 'reports', path: '/reports', label: 'التقارير', icon: '📊' },
     { id: 'decision-center', path: '/decision-center', label: 'مركز القرار', icon: '🧠' },
+    { id: 'cash-flow-forecast', path: '/cash-flow-forecast', label: '🔮 التوقعات المالية', icon: '🔮' },
     { id: 'settings', path: '/settings', label: 'الإعدادات', icon: '⚙️' },
+
   ];
 
 
