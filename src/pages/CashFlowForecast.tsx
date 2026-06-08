@@ -201,11 +201,12 @@ export default function CashFlowForecastPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-4xl font-extrabold text-white">التوقعات المالية</h2>
+        <h2 className="text-4xl font-extrabold text-white tracking-tight">التوقعات المالية</h2>
         <p className="text-slate-200 font-medium mt-1">
           توقعات التحصيل والسيولة بناءً على بياناتك الحالية
         </p>
       </div>
+
 
       <FinCard>
         <div
